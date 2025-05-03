@@ -307,8 +307,8 @@ const AdjustStockModal = ({ item, onClose, onUpdate }) => {
 
       // Send the request to the backend
       const response = await axios.patch(
-        `http://localhost:5000/api/items/${item._id}`,
-        { additionalStock } // Send additionalStock to the backend
+        `${import.meta.env.VITE_SOCKET_URL_PROD}/api/items/${item._id}`,
+        { additionalStock }
       );
 
       // Update the parent component with the new item data
