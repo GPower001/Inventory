@@ -1,6 +1,6 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import tailwindcss from '@tailwindcss/vite'
+// import { defineConfig } from 'vite'
+// import react from '@vitejs/plugin-react'
+// import tailwindcss from '@tailwindcss/vite'
 
 // // https://vite.dev/config/
 // export default defineConfig({
@@ -15,20 +15,32 @@ import tailwindcss from '@tailwindcss/vite'
   
 // })
 
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
+
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [
+    react(),
+    tailwindcss()
+  ],
   server: {
     proxy: {
+      // API routes
       '/api': {
-        target: import.meta.env.VITE_SOCKET_URL_PROD || 'http://localhost:5000',
-        changeOrigin: true,
-        ws: true,
+        target: ['http://localhost:5000', 'https://inventory-sycr.onrender.com'],
+        changeOrigin: true
       },
+      // Socket.IO routes
       '/socket.io': {
-        target: import.meta.env.VITE_SOCKET_URL_PROD || 'http://localhost:5000',
+        target: ['http://localhost:5000', 'https://inventory-sycr.onrender.com'],
         ws: true,
-        changeOrigin: true,
+        changeOrigin: true
       }
     }
+  },
+  optimizeDeps: {
+    include: ['react', 'react-dom']
   }
-});
+})
+
