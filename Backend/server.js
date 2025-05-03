@@ -46,14 +46,16 @@ const server = http.createServer(app);
 const allowedOrigins = [
   "http://localhost:5173", // Local development frontend
   process.env.FRONTEND_URL, // Frontend URL from environment variables
+  "https://inventory-sycr.onrender.com", // Deployed frontend URL
 ];
 
 const corsOptions = {
   origin: (origin, callback) => {
+    console.log("Incoming request origin:", origin); // Log the origin
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      console.error("Blocked by CORS:", origin);
+      console.error("Blocked by CORS:", origin); // Log blocked origins
       callback(new Error("Not allowed by CORS"));
     }
   },
