@@ -23,6 +23,7 @@ cron.schedule("0 * * * *", async () => {
 });
 
 
+const __dirname = path.resolve(); // Get the current directory (ESM alternative to __dirname)
 dotenv.config();
 
 // Connect to the database
@@ -122,25 +123,12 @@ app.use((err, req, res, next) => {
 
 if (process.env.NODE_ENV === "production") {
   // Resolve the current directory
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = path.dirname(__filename);
+  app.use(express.static(path.join(__dirname, "../Frontend/dist")));
 
-  // Serve static files from the frontend's `dist` folder
-  const frontendPath = path.join(__dirname, "../Frontend/dist");
-  console.log("Serving static files from:", frontendPath);
-  app.use(express.static(frontendPath));
-
-  // Catch-all route to serve `index.html` for non-API routes
   app.get("*", (req, res) => {
-    const indexPath = path.join(frontendPath, "index.html");
-    console.log("Serving index.html for:", req.url);
-    res.sendFile(indexPath, (err) => {
-      if (err) {
-        console.error("Error serving index.html:", err);
-        res.status(500).send("An error occurred while serving the frontend.");
-      }
-    });
-  });
+    res.sendFile(path.join(__dirname, "../Frontend", "dist", "index.html"));
+  }); 
+
 }
 
 // **Start Server**
