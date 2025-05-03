@@ -1,0 +1,26 @@
+import mongoose from "mongoose";
+
+// const itemSchema = new mongoose.Schema({
+//   itemName: { type: String, required: true },
+//   category: { type: String, required: true },
+//   enabled: { type: String, enum: ["Product", "Service"], required: true },
+//   openingQty: { type: Number, default: 0 },
+//   minStock: { type: Number, default: 0 },
+//   date: { type: Date, required: true },
+//   itemCode: { type: String, required: true },
+//   imageUrl: { type: String },
+// }, { timestamps: true });
+
+// export default mongoose.model("Item", itemSchema);
+
+// models/Item.js
+const itemSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  category: { type: String, required: true },
+  openingQty: { type: Number, required: true },
+  minStock: { type: Number, required: true },
+  itemCode: { type: String, unique: true },
+  imageUrl: { type: String },
+}, { timestamps: true });
+
+export default mongoose.model("Item", itemSchema);
