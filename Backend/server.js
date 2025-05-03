@@ -52,16 +52,18 @@ const allowedOrigins = [
 const corsOptions = {
   origin: (origin, callback) => {
     console.log("Incoming request origin:", origin); // Log the origin
+    console.log("Allowed origins:", allowedOrigins); // Log the allowed origins
     if (!origin || allowedOrigins.includes(origin)) {
+      console.log("CORS allowed for:", origin);
       callback(null, true);
     } else {
       console.error("Blocked by CORS:", origin); // Log blocked origins
       callback(new Error("Not allowed by CORS"));
     }
   },
-  credentials: true, // Allow cookies and authorization headers
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"], // Allowed HTTP methods
-  allowedHeaders: ["Content-Type", "Authorization"], // Allowed headers
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 };
 
 app.use(cors(corsOptions)); // Apply CORS globally
@@ -98,6 +100,7 @@ export const io = new Server(server, {
   cors: {
     origin: [
       "http://localhost:5173", // Local development frontend
+      "https://inventory-sycr.onrender.com", // Deployed frontend URL
     ],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     credentials: true,
