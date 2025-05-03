@@ -53,7 +53,14 @@ const corsOptions = {
   origin: (origin, callback) => {
     console.log("Incoming request origin:", origin); // Log the origin
     console.log("Allowed origins:", allowedOrigins); // Log the allowed origins
-    if (!origin || allowedOrigins.includes(origin)) {
+
+    // Allow requests without an origin (e.g., Postman or cURL)
+    if (!origin) {
+      console.log("CORS allowed for: undefined origin (e.g., Postman or cURL)");
+      return callback(null, true);
+    }
+
+    if (allowedOrigins.includes(origin)) {
       console.log("CORS allowed for:", origin);
       callback(null, true);
     } else {
@@ -65,7 +72,6 @@ const corsOptions = {
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
-
 app.use(cors(corsOptions)); // Apply CORS globally
 // **Middleware for Parsing Request Body**
 app.use(express.json()); // Parse JSON bodies

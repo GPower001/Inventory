@@ -23,7 +23,8 @@ const Navbar = () => {
     const fetchNotifications = async () => {
       try {
         const response = await axios.get("/api/notifications");
-        setNotifications(response.data.data.filter((n) => !n.isRead)); // Only show unread notifications
+        const notificationsData = response?.data?.data || []; // Fallback to an empty array
+        setNotifications(notificationsData.filter((n) => !n.isRead)); // Only show unread notifications
       } catch (error) {
         console.error("Error fetching notifications:", error.message);
       }

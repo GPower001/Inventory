@@ -38,33 +38,37 @@ const Dashboard = () => {
   const [lowStockItems, setLowStockItems] = useState([]); // State to store low stock items
 
   // Fetch data from the backend
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Fetch low stock items
-        const lowStockResponse = await axios.get("/api/items/lowstock");
-        setStockData((prev) => ({
-          ...prev,
-          lowStock: lowStockResponse.data.data.length, // Update low stock count
-        }));
-        setLowStockItems(lowStockResponse.data.data); // Store low stock items
-      
-        // Fetch inventory data
-        const inventoryResponse = await axios.get("/api/items");
-        setInventory(inventoryResponse.data.data);
+  const baseURL = import.meta.env.MODE === 'development'
+  ? import.meta.env.VITE_API_URL // Development URL
+  : import.meta.env.VITE_SOCKET_URL_PROD; // Production URL
 
-        // Update total products count
-        setStockData((prev) => ({
-          ...prev,
-          products: inventoryResponse.data.data.length,
-        }));
-      } catch (error) {
-        console.error("Error fetching dashboard data:", error);
-      }
-    };
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      // Fetch low stock items
+      const lowStockResponse = await axios.get(`${baseURL}/api/items/lowstock`);
+      setStockData((prev) => ({
+        ...prev,
+        lowStock: lowStockResponse.data.data.length, // Update low stock count
+      }));
+      setLowStockItems(lowStockResponse.data.data); // Store low stock items
 
-    fetchData();
-  }, []);
+      // Fetch inventory data
+      const inventoryResponse = await axios.get(`${baseURL}/api/items`);
+      setInventory(inventoryResponse.data.data);
+
+      // Update total products count
+      setStockData((prev) => ({
+        ...prev,
+        products: inventoryResponse.data.data.length,
+      }));
+    } catch (error) {
+      console.error("Error fetching dashboard data:", error);
+    }
+  };
+
+  fetchData();
+}, []);
 
   return (
     <div className="p-6">

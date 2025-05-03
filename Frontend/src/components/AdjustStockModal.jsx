@@ -300,17 +300,22 @@ const AdjustStockModal = ({ item, onClose, onUpdate }) => {
     e.preventDefault();
     setIsSubmitting(true);
     setError('');
-
+  
     try {
       // Determine the value of additionalStock based on adjustment type
       const additionalStock = adjustmentType === 'add' ? quantityToAdjust : -quantityToAdjust;
-
+  
+      // Use the appropriate URL based on the environment
+      const baseURL = import.meta.env.MODE === 'development'
+        ? import.meta.env.VITE_SOCKET_URL_DEV // Development URL
+        : import.meta.env.VITE_SOCKET_URL_PROD; // Production URL
+  
       // Send the request to the backend
       const response = await axios.patch(
-        `${import.meta.env.VITE_SOCKET_URL_PROD}/api/items/${item._id}`,
+        `${baseURL}/api/items/${item._id}`,
         { additionalStock }
       );
-
+  
       // Update the parent component with the new item data
       onUpdate(response.data.data);
       onClose();
@@ -320,7 +325,6 @@ const AdjustStockModal = ({ item, onClose, onUpdate }) => {
       setIsSubmitting(false);
     }
   };
-
   const handleQuantityChange = (value) => {
     const numValue = parseInt(value) || 0;
     if (adjustmentType === 'remove' && numValue > item.openingQty) {
