@@ -162,7 +162,7 @@ function Login() {
 
             // Use the environment variable for the base API URL
             const response = await api.post(
-                `${import.meta.env.VITE_API_URL}${endpoint}`,
+                `${import.meta.env.VITE_SOCKET_URL_PROD}${endpoint}`,
                 formData,
                 { withCredentials: true } // Ensures cookies (if using JWT)
             );
