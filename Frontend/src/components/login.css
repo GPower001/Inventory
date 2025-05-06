@@ -144,3 +144,64 @@ body {
 .content.active .switch-right {
     transform: translateX(200%);
 }
+/* login.css */
+@media (max-width: 768px) {
+    .right-box {
+      display: block !important; /* Ensure login form is visible on small screens */
+    }
+  
+    .switch-content {
+      flex-direction: column !important;
+    }
+  
+    .switch-panel {
+      margin-bottom: 1rem !important;
+    }
+  }
+
+  /* Custom styles */
+.welcome-text {
+    color: #42aeb5;
+  }
+  
+  .login-btn {
+    background-color: #42aeb5;
+    color: #ffffff;
+    transition: all 0.3s ease-in-out;
+  }
+  
+  .login-btn:hover {
+    background-color: #369a9f;
+    transform: scale(1.05);
+    color: #ffffff;
+  }
+
+  /* Welcome text color */
+.welcome-text {
+    color: #42aeb5;
+  }
+  
+  /* Custom input border */
+  .custom-input {
+    border: 2px solid #42aeb5;
+    transition: border-color 0.3s ease-in-out;
+  }
+  
+  .custom-input:focus {
+    border-color: #369a9f; /* Darker shade when focused */
+    box-shadow: 0 0 5px rgba(66, 174, 181, 0.5);
+  }
+  
+  /* Button styling */
+  .login-btn {
+    background-color: #42aeb5;
+    color: #ffffff;
+    transition: all 0.3s ease-in-out;
+  }
+  
+  .login-btn:hover {
+    background-color: #369a9f;
+    transform: scale(1.05);
+  }
+  
+  
