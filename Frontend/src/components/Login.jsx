@@ -290,22 +290,29 @@ const Login = () => {
     setError("");
 
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/auth/login`,
-        { name, password },
-        { withCredentials: true }
-      );
-
-      console.log("Login successful:", response.data);
-      alert(response.data.message || "Login successful!");
-      localStorage.setItem("authToken", response.data.token);
-      window.location.href = "/dashboard";
-    } catch (err) {
-      console.error("Login error:", err.response?.data || err.message);
-      setError(err.response?.data?.message || "An error occurred. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+        // Determine the base URL based on the environment
+        const baseURL =
+          import.meta.env.MODE === "production"
+            ? import.meta.env.VITE_SOCKET_URL_PROD // Use production URL
+            : import.meta.env.VITE_SOCKET_URL_DEV; // Use development URL
+      
+        // Send a POST request to the backend login endpoint
+        const response = await axios.post(
+          `${baseURL}/api/auth/login`, // Dynamically use the correct base URL
+          { name, password }, // Login credentials
+          { withCredentials: true } // Include credentials (e.g., cookies) if needed
+        );
+      
+        console.log("Login successful:", response.data); // Log the response
+        alert(response.data.message || "Login successful!"); // Show success message
+        localStorage.setItem("authToken", response.data.token); // Save token to localStorage
+        window.location.href = "/dashboard"; // Redirect to the dashboard
+      } catch (err) {
+        console.error("Login error:", err.response?.data || err.message); // Log the error
+        setError(err.response?.data?.message || "An error occurred. Please try again."); // Display error message
+      } finally {
+        setLoading(false); // Stop the loading spinner
+      }
   };
 
   return (
