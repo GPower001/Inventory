@@ -37,6 +37,7 @@ const Dashboard = () => {
   const [inventory, setInventory] = useState([]);
   const [lowStockItems, setLowStockItems] = useState([]); // State to store low stock items
 
+
   // Fetch data from the backend
   const baseURL = import.meta.env.MODE === 'development'
   ? import.meta.env.VITE_API_URL // Development URL
