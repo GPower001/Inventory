@@ -11,6 +11,7 @@ import Login from "./components/Login";
 import AdjustStockPage from "./pages/AdjustStockPage";
 import LowStockPage from "./pages/LowStockPage";
 import ItemCategoryPage from "./pages/ItemCategoryPage";
+import ExpiredItems from "./pages/ExpiredItemPage";
 
 // Protected Route as a Component
 const ProtectedRoute = ({ children }) => {
@@ -38,7 +39,8 @@ const router = createBrowserRouter([
       { path: "/dashboard/inventory/consumables", element: <ConsumablePage /> },
       { path: "/dashboard/inventory/general", element: <GeneralPage /> },
       { path: "Low-stock", element: <LowStockPage /> },
-      { path: "categories", element: <ItemCategoryPage /> }
+      { path: "categories", element: <ItemCategoryPage /> },
+      { path: "expired-products", element: <ExpiredItems /> },
     ],
   },
   { path: "*", element: <Navigate to="/dashboard" replace /> },

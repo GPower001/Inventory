@@ -103,47 +103,49 @@ const Navbar = () => {
                 <div className="px-4 py-2 border-b border-gray-100 bg-gray-50">
                   <h3 className="text-sm font-medium text-gray-700">Notifications</h3>
                 </div>
-
-                {notifications.length > 0 ? (
-                  notifications.map((notification) => (
-                    <div
-                      key={notification._id}
-                      className={`px-4 py-3 hover:bg-gray-50 cursor-pointer ${
-                        notification.type === "expired" ? "bg-red-50" : "bg-amber-50"
-                      }`}
-                      onClick={() => markAsRead(notification._id)} // Mark as read on click
-                    >
-                      <div className="flex items-start gap-2">
-                        <div
-                          className={`mt-0.5 p-1 rounded-full ${
-                            notification.type === "expired"
-                              ? "bg-red-100 text-red-600"
-                              : "bg-amber-100 text-amber-600"
-                          }`}
-                        >
-                          <AlertTriangle size={14} />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-gray-900">
-                            {notification.item}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            {notification.message}
-                          </p>
-                          {notification.expiryDate && (
-                            <p className="text-xs mt-1 text-red-600">
-                              Expiry: {new Date(notification.expiryDate).toLocaleDateString()}
+                {/* Make notifications scrollable with a max height */}
+                <div className="max-h-80 overflow-y-auto">
+                  {notifications.length > 0 ? (
+                    notifications.map((notification) => (
+                      <div
+                        key={notification._id}
+                        className={`px-4 py-3 hover:bg-gray-50 cursor-pointer ${
+                          notification.type === "expired" ? "bg-red-50" : "bg-amber-50"
+                        }`}
+                        onClick={() => markAsRead(notification._id)} // Mark as read on click
+                      >
+                        <div className="flex items-start gap-2">
+                          <div
+                            className={`mt-0.5 p-1 rounded-full ${
+                              notification.type === "expired"
+                                ? "bg-red-100 text-red-600"
+                                : "bg-amber-100 text-amber-600"
+                            }`}
+                          >
+                            <AlertTriangle size={14} />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-gray-900">
+                              {notification.item}
                             </p>
-                          )}
+                            <p className="text-xs text-gray-500">
+                              {notification.message}
+                            </p>
+                            {notification.expiryDate && (
+                              <p className="text-xs mt-1 text-red-600">
+                                Expiry: {new Date(notification.expiryDate).toLocaleDateString()}
+                              </p>
+                            )}
+                          </div>
                         </div>
                       </div>
+                    ))
+                  ) : (
+                    <div className="px-4 py-3 text-center text-sm text-gray-500">
+                      No new notifications
                     </div>
-                  ))
-                ) : (
-                  <div className="px-4 py-3 text-center text-sm text-gray-500">
-                    No new notifications
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </div>
           )}

@@ -11,9 +11,9 @@ const DashboardLayout = ({ children }) => {
       <SideBar2 />
       <div className="flex-1 flex flex-col bg-gray-100">
         <Nav />
-        <BackToTop/>
-        <main className="p-6">
-          <Outlet/>
+        <BackToTop/> 
+        <main className="p-6 overflow-y-auto">
+        <Outlet />
         </main>
       </div>
     </div>
@@ -21,5 +21,3 @@ const DashboardLayout = ({ children }) => {
 };
 
 export default DashboardLayout;
-
-

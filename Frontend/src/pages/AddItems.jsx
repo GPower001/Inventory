@@ -9,6 +9,7 @@ const AddItems = ({ onClose, onItemAdded }) => {
   const [openingQty, setOpeningQty] = useState("");
   const [minStock, setMinStock] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [expiryDate, setExpiryDate] = useState(""); // <-- Expiry date state
   const [itemCode, setItemCode] = useState("");
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
@@ -51,6 +52,7 @@ const AddItems = ({ onClose, onItemAdded }) => {
       formData.append("minStock", minStock || 0);
       formData.append("itemCode", itemCode || `ITEM-${Date.now()}`);
       formData.append("dateAdded", date);
+      if (expiryDate) formData.append("expiryDate", expiryDate); // <-- Add expiry date
       if (image) formData.append("image", image);
 
       const response = await axios.post("/api/items", formData, {
@@ -67,6 +69,7 @@ const AddItems = ({ onClose, onItemAdded }) => {
       setItemCode("");
       setImage(null);
       setImagePreview("");
+      setExpiryDate(""); // Clear expiry date
 
       // Set success message
       setSuccess("Item added successfully!");
@@ -253,6 +256,18 @@ const AddItems = ({ onClose, onItemAdded }) => {
                     className="w-full border border-gray-300 rounded-md py-2 px-3 outline-none focus:border-teal-600"
                   />
                 </div>
+                {/* Expiry Date Field */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Expiry Date
+                  </label>
+                  <input
+                    type="date"
+                    value={expiryDate}
+                    onChange={(e) => setExpiryDate(e.target.value)}
+                    className="w-full border border-gray-300 rounded-md py-2 px-3 outline-none focus:border-teal-600"
+                  />
+                </div>
               </div>
             </div>
 
@@ -278,6 +293,295 @@ const AddItems = ({ onClose, onItemAdded }) => {
 };
 
 export default AddItems;
+
+
+
+
+
+
+
+
+
+// import React, { useState } from "react";
+// import { ImagePlus, X } from "lucide-react";
+// import axios from "axios";
+
+// const AddItems = ({ onClose, onItemAdded }) => {
+//   const [enabled, setEnabled] = useState(false);
+//   const [itemName, setItemName] = useState("");
+//   const [category, setCategory] = useState("");
+//   const [openingQty, setOpeningQty] = useState("");
+//   const [minStock, setMinStock] = useState("");
+//   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+//   const [itemCode, setItemCode] = useState("");
+//   const [image, setImage] = useState(null);
+//   const [imagePreview, setImagePreview] = useState("");
+//   const [loading, setLoading] = useState(false);
+//   const [error, setError] = useState(null);
+//   const [success, setSuccess] = useState(null); // State for success message
+
+//   const generateItemCode = () => {
+//     const code = `ITEM-${Math.floor(1000 + Math.random() * 9000)}`;
+//     setItemCode(code);
+//   };
+
+//   const handleImageUpload = (event) => {
+//     const file = event.target.files[0];
+//     if (file) {
+//       setImage(file);
+//       setImagePreview(URL.createObjectURL(file));
+//     }
+//   };
+
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+//     setLoading(true);
+//     setError(null);
+//     setSuccess(null); // Clear previous success message
+
+//     // Validate required fields
+//     if (!itemName || !category) {
+//       setError("Please fill in required fields.");
+//       setLoading(false);
+//       return;
+//     }
+
+//     try {
+//       const formData = new FormData();
+//       // Append all fields (required and optional)
+//       formData.append("name", itemName);
+//       formData.append("category", category);
+//       formData.append("openingQty", openingQty || 0);
+//       formData.append("minStock", minStock || 0);
+//       formData.append("itemCode", itemCode || `ITEM-${Date.now()}`);
+//       formData.append("dateAdded", date);
+//       if (image) formData.append("image", image);
+
+//       const response = await axios.post("/api/items", formData, {
+//         headers: {
+//           "Content-Type": "multipart/form-data",
+//         },
+//       });
+
+//       // Clear form on success
+//       setItemName("");
+//       setCategory("");
+//       setOpeningQty("");
+//       setMinStock("");
+//       setItemCode("");
+//       setImage(null);
+//       setImagePreview("");
+
+//       // Set success message
+//       setSuccess("Item added successfully!");
+
+//       // Notify parent component
+//       if (onItemAdded) {
+//         onItemAdded(response.data);
+//       }
+
+//       // Close modal if needed
+//       if (onClose) {
+//         setTimeout(() => onClose(), 2000); // Close after 2 seconds
+//       }
+//     } catch (error) {
+//       console.error("Error adding item:", {
+//         message: error.message,
+//         response: error.response?.data,
+//         status: error.response?.status,
+//         config: error.config,
+//       });
+
+//       setError(
+//         error.response?.data?.message ||
+//           error.response?.data?.error ||
+//           "Failed to add item. Please try again."
+//       );
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   return (
+//     <div className="p-4 sm:p-6 md:p-8 lg:p-10">
+//       {/* Error message */}
+//       {error && (
+//         <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
+//           <p>{error}</p>
+//         </div>
+//       )}
+
+//       {/* Success message */}
+//       {success && (
+//         <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 rounded">
+//           <p>{success}</p>
+//         </div>
+//       )}
+
+//       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+//         {/* Header */}
+//         <div className="flex items-center justify-between bg-teal-800 text-white p-4">
+//           <div className="flex gap-6 items-center">
+//             <h2 className="text-xl md:text-2xl font-semibold">Add Item</h2>
+//             <div className="flex items-center space-x-4">
+//               <span>Product</span>
+//               <div
+//                 className={`w-10 h-5 flex items-center rounded-full p-1 cursor-pointer transition-colors ${
+//                   enabled ? "bg-teal-500" : "bg-gray-300"
+//                 }`}
+//                 onClick={() => setEnabled(!enabled)}
+//               >
+//                 <div
+//                   className={`w-4 h-4 bg-white rounded-full shadow-md transform transition-transform ${
+//                     enabled ? "translate-x-5" : "translate-x-0"
+//                   }`}
+//                 />
+//               </div>
+//               <span>Service</span>
+//             </div>
+//           </div>
+//           <button
+//             onClick={onClose}
+//             className="p-1 rounded-full hover:bg-teal-700 transition-colors"
+//             disabled={loading}
+//           >
+//             <X className="w-6 h-6" />
+//           </button>
+//         </div>
+
+//         {/* Form Fields */}
+//         <div className="p-4 sm:p-6">
+//           <form onSubmit={handleSubmit}>
+//             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+//               {/* Item Name */}
+//               <div className="relative">
+//                 <label className="block text-sm font-medium text-gray-700 mb-1">
+//                   Item Name <span className="text-red-500">*</span>
+//                 </label>
+//                 <input
+//                   type="text"
+//                   value={itemName}
+//                   onChange={(e) => setItemName(e.target.value)}
+//                   className="w-full border border-gray-300 rounded-md py-2 px-3 outline-none focus:border-teal-600"
+//                   required
+//                 />
+//               </div>
+
+//               {/* Category */}
+//               <div className="relative">
+//                 <label className="block text-sm font-medium text-gray-700 mb-1">
+//                   Category <span className="text-red-500">*</span>
+//                 </label>
+//                 <select
+//                   value={category}
+//                   onChange={(e) => setCategory(e.target.value)}
+//                   className="w-full border border-gray-300 rounded-md py-2 px-3 outline-none focus:border-teal-600"
+//                   required
+//                 >
+//                   <option value="">Select</option>
+//                   <option value="Medication">Medications</option>
+//                   <option value="Consumables">Consumables</option>
+//                   <option value="Generals">Generals</option>
+//                 </select>
+//               </div>
+
+//               {/* Units Button */}
+//               <div className="flex items-end">
+//                 <button
+//                   type="button"
+//                   className="bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded transition-colors"
+//                 >
+//                   Select Units
+//                 </button>
+//               </div>
+
+//               {/* Image Upload */}
+//               <div className="relative">
+//                 <label className="flex items-center space-x-2 text-gray-700 cursor-pointer">
+//                   <ImagePlus size={18} />
+//                   <span className="text-sm font-medium">Add Image</span>
+//                   <input
+//                     type="file"
+//                     className="hidden"
+//                     onChange={handleImageUpload}
+//                   />
+//                 </label>
+//                 {imagePreview && (
+//                   <div className="mt-2">
+//                     <img
+//                       src={imagePreview}
+//                       alt="Preview"
+//                       className="h-16 w-16 object-cover rounded-md"
+//                     />
+//                   </div>
+//                 )}
+//               </div>
+//             </div>
+
+//             {/* Stock Section */}
+//             <div className="mt-6">
+//               <h2 className="text-lg font-semibold text-gray-700 mb-4">
+//                 Stock Information
+//               </h2>
+//               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+//                 <div>
+//                   <label className="block text-sm font-medium text-gray-700 mb-1">
+//                     Opening Quantity
+//                   </label>
+//                   <input
+//                     type="number"
+//                     value={openingQty}
+//                     onChange={(e) => setOpeningQty(e.target.value)}
+//                     className="w-full border border-gray-300 rounded-md py-2 px-3 outline-none focus:border-teal-600"
+//                   />
+//                 </div>
+//                 <div>
+//                   <label className="block text-sm font-medium text-gray-700 mb-1">
+//                     Min Stock To Maintain
+//                   </label>
+//                   <input
+//                     type="number"
+//                     value={minStock}
+//                     onChange={(e) => setMinStock(e.target.value)}
+//                     className="w-full border border-gray-300 rounded-md py-2 px-3 outline-none focus:border-teal-600"
+//                   />
+//                 </div>
+//                 <div>
+//                   <label className="block text-sm font-medium text-gray-700 mb-1">
+//                     As Of Date
+//                   </label>
+//                   <input
+//                     type="date"
+//                     value={date}
+//                     onChange={(e) => setDate(e.target.value)}
+//                     className="w-full border border-gray-300 rounded-md py-2 px-3 outline-none focus:border-teal-600"
+//                   />
+//                 </div>
+//               </div>
+//             </div>
+
+//             {/* Submit Button */}
+//             <div className="mt-6">
+//               <button
+//                 type="submit"
+//                 className={`w-full sm:w-auto px-6 py-2 rounded-md text-white font-medium ${
+//                   loading
+//                     ? "bg-teal-400 cursor-not-allowed"
+//                     : "bg-teal-600 hover:bg-teal-700"
+//                 } transition-colors`}
+//                 disabled={loading}
+//               >
+//                 {loading ? "Saving..." : "Save Item"}
+//               </button>
+//             </div>
+//           </form>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default AddItems;
 
 
 

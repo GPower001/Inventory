@@ -50,6 +50,30 @@ export const getItems = async (req, res) => {
  * @route POST /api/items
  * @access Public
  */
+// export const addItem = async (req, res) => {
+//   try {
+//     console.log("Request Body:", req.body); // Log the incoming request body
+
+//     const items = req.body;
+
+//     if (!items.name || !items.category || !items.openingQty || !items.minStock) {
+//       return res.status(400).json({ message: "Name and quantity are required" });
+//     }
+
+//     const newItem = new Item(items);
+//     console.log("New Item to Save:", newItem); // Log the item before saving
+
+//     const savedItem = await newItem.save();
+//     res.status(201).json({ success: true, data: savedItem });
+//   } catch (error) {
+//     console.error("Error in Creating item:", error); // Log the full error
+//     if (error.code === 11000) {
+//       return res.status(400).json({ message: "Item code already exists" });
+//     }
+//     res.status(500).json({ message: "Server error", error });
+//   }
+// };
+
 export const addItem = async (req, res) => {
   try {
     console.log("Request Body:", req.body); // Log the incoming request body
@@ -60,7 +84,19 @@ export const addItem = async (req, res) => {
       return res.status(400).json({ message: "Name and quantity are required" });
     }
 
-    const newItem = new Item(items);
+    // Handle expiration date if provided
+    let expiryDate = undefined;
+    if (items.expiryDate) {
+      expiryDate = new Date(items.expiryDate);
+      if (isNaN(expiryDate.getTime())) {
+        return res.status(400).json({ message: "Invalid expiry date format" });
+      }
+    }
+
+    const newItem = new Item({
+      ...items,
+      expiryDate: expiryDate, // Will be undefined if not provided
+    });
     console.log("New Item to Save:", newItem); // Log the item before saving
 
     const savedItem = await newItem.save();
@@ -127,3 +163,16 @@ export const updateItem = async (req, res) => {
   }
 };
 
+export const getExpiredItems = async (req, res) => {
+  try {
+    const today = new Date();
+    // Find items where expiryDate exists and is less than or equal to today
+    const expiredItems = await Item.find({
+      expiryDate: { $exists: true, $ne: null, $lte: today }
+    });
+    res.status(200).json({ success: true, data: expiredItems });
+  } catch (error) {
+    console.error("Error fetching expired items:", error);
+    res.status(500).json({ message: "Server error", error });
+  }
+};

@@ -87,6 +87,7 @@ app.use("/api/items/:category", itemRoutes);
 app.use("/api/items/:category", itemRoutes); 
 app.use("/api/items/:id", itemRoutes)
 app.use("/api/items/lowstock", itemRoutes); 
+app.use("/api/items/expired", itemRoutes); // Route for expired items
 
 // notifications
 app.use("/api/notifications", notificationRoutes);

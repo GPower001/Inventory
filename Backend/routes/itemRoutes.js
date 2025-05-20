@@ -339,41 +339,18 @@
 
 import { Router } from 'express';
 const router = Router();
-import { addItem, deleteItems, getItems, getLowStockItems, updateItem } from '../controllers/itemController.js';
+import { addItem, deleteItems, getExpiredItems, getItems, getLowStockItems, updateItem } from '../controllers/itemController.js';
 import { getMedications } from '../controllers/medicationController.js';
 import { getConsumables } from '../controllers/consumablesControlllers.js';
 import { getGenerals } from '../controllers/generalControllers.js';
 
-// // Debugging route
-// router.get('/test', (req, res) => {
-//   console.log('Test route hit!');
-//   res.json({ message: 'API is working!' });
-// });
-
-// GET all items with enhanced error handling
-// router.get('/items', async (req, res) => {
-//   console.log(' Attempting to fetch items...');
-//   try {
-//     console.log('Checking Item model:', Item ? 'Exists' : 'UNDEFINED');
-//     const items = await Item.find({}).maxTimeMS(10000);
-//     console.log(` Found ${items.length} items`);
-//     res.json(items);
-//   } catch (err) {
-//     console.error(' Database error:', err.message);
-//     console.error('Full error stack:', err.stack);
-//     res.status(500).json({ 
-//       error: 'Database operation failed',
-//       details: process.env.NODE_ENV === 'development' ? err.message : undefined
-//     });
-//   }
-// });
 
 // GET all items
 router.get('/',getItems);
 
 // Define the route for low stock items
 router.get("/:id", getLowStockItems);
-
+router.get('/expired', getExpiredItems);
 
 // POST new item with detailed logging
 router.post('/',addItem);
