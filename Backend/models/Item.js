@@ -10,4 +10,5 @@ const itemSchema = new mongoose.Schema({
   expiryDate: { type: Date },
 }, { timestamps: true });
 
-export default mongoose.models.Item || mongoose.model("Item", itemSchema);
+const Item = mongoose.models.Item || mongoose.model("Item", itemSchema);
+export default Item;
