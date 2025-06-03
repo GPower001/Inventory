@@ -1,5 +1,5 @@
 import multer from 'multer';
-import Item from "../models/Item.js";
+import Item from "../models/item.js";
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { existsSync, mkdirSync } from 'fs';
@@ -166,7 +166,8 @@ export const updateItem = async (req, res) => {
 export const getExpiredItems = async (req, res) => {
   try {
     const today = new Date();
-    // Find items where expiryDate exists and is less than or equal to today
+    // Only get items that have an expiryDate and are expired (expiryDate <= today)
+    // Exclude items that do NOT have an expiryDate (i.e., only get expired items)
     const expiredItems = await Item.find({
       expiryDate: { $exists: true, $ne: null, $lte: today }
     });

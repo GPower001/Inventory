@@ -6,6 +6,8 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { FaFileExcel, FaFileWord } from "react-icons/fa";
 
+// ...existing imports...
+
 const PAGE_SIZE = 10;
 
 const ExpiredItems = () => {
@@ -25,8 +27,14 @@ const ExpiredItems = () => {
     try {
       const res = await axios.get(`${baseURL}/api/items/expired`);
       const data = res.data.data || res.data;
-      // Filter out items with no expiryDate
-      return (data.items || data).filter(item => item.expiryDate);
+      // Only include items that are actually expired (expiryDate <= today)
+      const today = new Date();
+      // Only pick items that are expired (not low stock)
+      return (data.items || data).filter(
+        item =>
+          item.expiryDate &&
+          new Date(item.expiryDate) <= today
+      );
     } catch {
       return [];
     }
@@ -40,11 +48,16 @@ const ExpiredItems = () => {
           `${baseURL}/api/items/expired?page=${page}&limit=${PAGE_SIZE}`
         );
         const data = res.data.data || res.data;
-        // Filter out items with no expiryDate
-        const filtered = (data.items || data).filter(item => item.expiryDate);
+        const today = new Date();
+        // Only pick items that are expired (not low stock)
+        const filtered = (data.items || data).filter(
+          item =>
+            item.expiryDate &&
+            new Date(item.expiryDate) <= today
+        );
         setExpiredItems(filtered);
         setTotalItems(data.total
-          ? filtered.length // If backend returns total, use filtered length
+          ? filtered.length
           : filtered.length
         );
       } catch (err) {
@@ -57,6 +70,9 @@ const ExpiredItems = () => {
   }, [baseURL, page]);
 
   const totalPages = Math.ceil(totalItems / PAGE_SIZE);
+
+  // ...existing export handlers and render code...
+  // (No changes needed below this line)
 
   // Export to Excel
   const handleExportExcel = async () => {

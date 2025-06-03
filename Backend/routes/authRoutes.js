@@ -13,7 +13,7 @@ const router = express.Router();
  */
 
 /**
- * @swagger
+    @swagger
  * /auth/register:
  *   post:
  *     summary: Register a new user
