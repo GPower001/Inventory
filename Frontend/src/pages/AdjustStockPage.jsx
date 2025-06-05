@@ -4,21 +4,20 @@ import { Search } from 'lucide-react';
 import axios from 'axios';
 
 const AdjustStockPage = () => {
-  const [items, setItems] = useState([]); // Declare items state
+  const [items, setItems] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1); // Current page
-  const itemsPerPage = 4; // Number of items per page
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 4;
 
-  // Fetch all items from the backend
   useEffect(() => {
     const fetchItems = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('/api/items'); // Fetch items from the backend
-        setItems(Array.isArray(response.data.data) ? response.data.data : []); // Ensure items is an array
+        const response = await axios.get('/api/items');
+        setItems(Array.isArray(response.data.data) ? response.data.data : []);
         setError(null);
       } catch (err) {
         console.error('Error fetching items:', err);
@@ -31,7 +30,6 @@ const AdjustStockPage = () => {
     fetchItems();
   }, []);
 
-  // Filter items based on the search term
   const filteredItems = Array.isArray(items)
     ? items.filter((item) =>
         (item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -39,28 +37,28 @@ const AdjustStockPage = () => {
       )
     : [];
 
-  // Pagination logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredItems.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
 
-  const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
+  const handlePageChange = (direction) => {
+    if (direction === "prev") {
+      setCurrentPage((prev) => Math.max(1, prev - 1));
+    } else if (direction === "next") {
+      setCurrentPage((prev) => Math.min(totalPages, prev + 1));
+    }
   };
 
-  // Handle stock update
   const handleStockUpdate = (updatedItem) => {
-    // Update the item in the state
     setItems((prevItems) =>
       prevItems.map((item) =>
         item._id === updatedItem._id ? updatedItem : item
       )
     );
-    setSelectedItem(null); // Close the modal
+    setSelectedItem(null);
   };
 
-  // Render loading state
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
@@ -69,7 +67,6 @@ const AdjustStockPage = () => {
     );
   }
 
-  // Render error state
   if (error) {
     return (
       <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded">
@@ -78,7 +75,6 @@ const AdjustStockPage = () => {
     );
   }
 
-  // Render the main content
   return (
     <div className="container mx-auto px-4 py-6">
       <div className="flex justify-between items-center mb-6">
@@ -151,34 +147,39 @@ const AdjustStockPage = () => {
                   </td>
                 </tr>
               ))
-              ) : (
-                <tr>
-                  <td colSpan="4" className="px-6 py-4 text-center text-gray-500">
-                    No items available
-                  </td>
-                </tr>
-              )}
+            ) : (
+              <tr>
+                <td colSpan="4" className="px-6 py-4 text-center text-gray-500">
+                  No items available
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
 
-      {/* Pagination Controls */}
-      <div className="flex justify-center mt-4">
-        {Array.from({ length: totalPages }, (_, index) => (
+      {/* Pagination Controls - ExpiredItems style */}
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center gap-2 mt-6">
           <button
-            id="pagination"
-            key={index + 1}
-            onClick={() => handlePageChange(index + 1)}
-            className={`px-3 py-1 mx-1 rounded ${
-              currentPage === index + 1
-                ? 'bg-[#42aeb5] text-white' // Active button color
-                : 'bg-gray-200 text-gray-700'
-            } hover:bg-[#184548] hover:text-white`} // Hover color
+            className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300"
+            onClick={() => handlePageChange("prev")}
+            disabled={currentPage === 1}
           >
-            {index + 1}
+            Prev
           </button>
-        ))}
-      </div>
+          <span>
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300"
+            onClick={() => handlePageChange("next")}
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </button>
+        </div>
+      )}
 
       {selectedItem && (
         <AdjustStockModal

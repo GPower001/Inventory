@@ -3,27 +3,10 @@ import axios from 'axios';
 
 const StockTable = ({
   items,
-  currentPage,
-  itemsPerPage,
-  handlePageChange,
-  totalPages,
   onItemDelete, // Callback for delete action
 }) => {
-  // Pagination logic
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = items.slice(indexOfFirstItem, indexOfLastItem);
-
   // Handle delete action
-//   const handleDelete = async (itemId) => {
-//     try {
-//       await axios.delete(`/api/items/${itemId}`); // Call the delete API
-//       onItemDelete(itemId); // Notify parent component to update the list
-//     } catch (error) {
-//       console.error('Error deleting item:', error);
-//     }
-//   };
-const handleDelete = async (itemId) => {
+  const handleDelete = async (itemId) => {
     try {
       await axios.delete(`/api/items/${itemId}`); // Call the delete API
       onItemDelete(itemId); // Notify parent component to update the list
@@ -52,8 +35,8 @@ const handleDelete = async (itemId) => {
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {currentItems.length > 0 ? (
-            currentItems.map((item) => (
+          {items.length > 0 ? (
+            items.map((item) => (
               <tr key={item._id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
                   {item.name || item.itemName}
@@ -78,7 +61,7 @@ const handleDelete = async (itemId) => {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <button
-                    onClick={() => handleDelete(item._id)} // Call delete handler
+                    onClick={() => handleDelete(item._id)}
                     className="text-red-600 hover:text-red-800 font-medium"
                   >
                     Delete
@@ -95,24 +78,7 @@ const handleDelete = async (itemId) => {
           )}
         </tbody>
       </table>
-
-      {/* Pagination Controls */}
-      <div className="flex justify-center mt-4">
-        {Array.from({ length: totalPages }, (_, index) => (
-          <button
-            id="pagination"
-            key={index + 1}
-            onClick={() => handlePageChange(index + 1)}
-            className={`px-3 py-1 mx-1 rounded ${
-              currentPage === index + 1
-                ? 'bg-[#42aeb5] text-white' // Active button color
-                : 'bg-gray-200 text-gray-700'
-            } hover:bg-[#184548] hover:text-white`} // Hover color
-          >
-            {index + 1}
-          </button>
-        ))}
-      </div>
+      {/* Pagination controls removed. Use Prev/Next in parent only. */}
     </div>
   );
 };
