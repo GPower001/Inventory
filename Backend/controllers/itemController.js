@@ -1,5 +1,5 @@
 import multer from 'multer';
-import Item from "../models/Item.js";
+import Item from "../models/item.js";
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { existsSync, mkdirSync } from 'fs';
