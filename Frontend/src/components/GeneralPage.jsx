@@ -8,6 +8,7 @@ const GeneralPage = () => {
   const itemsPerPage = 6; // Number of items per page
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [search, setSearch] = useState(""); // Search state
 
   useEffect(() => {
     const fetchItems = async () => {
@@ -30,7 +31,15 @@ const GeneralPage = () => {
     fetchItems();
   }, []);
 
-  const totalPages = Math.ceil(items.length / itemsPerPage);
+  // Filter by search
+  const filteredItems = items.filter(item =>
+    item.name?.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredItems.slice(indexOfFirstItem, indexOfLastItem);
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
@@ -40,6 +49,11 @@ const GeneralPage = () => {
     // Remove the deleted item from the state
     setItems((prevItems) => prevItems.filter((item) => item._id !== itemId));
   };
+
+  // Reset to page 1 when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
 
   if (loading) {
     return (
@@ -60,8 +74,18 @@ const GeneralPage = () => {
   return (
     <div className="container mx-auto px-4 py-6">
       <h1 className="text-2xl font-bold text-gray-800 mb-6">Generals</h1>
+      {/* Search Input */}
+      <div className="mb-4 flex justify-end">
+        <input
+          type="text"
+          placeholder="Search item name..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
+        />
+      </div>
       <StockTable
-        items={items}
+        items={currentItems}
         currentPage={currentPage}
         itemsPerPage={itemsPerPage}
         handlePageChange={handlePageChange}

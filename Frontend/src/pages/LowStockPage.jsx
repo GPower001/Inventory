@@ -1,10 +1,13 @@
 // import React, { useEffect, useState } from "react";
 // import axios from "axios";
 
+// const ITEMS_PER_PAGE = 5; // 5 items per page
+
 // const LowStockItems = () => {
 //   const [lowStockItems, setLowStockItems] = useState([]);
 //   const [loading, setLoading] = useState(true);
 //   const [error, setError] = useState(null);
+//   const [currentPage, setCurrentPage] = useState(1);
 
 //   useEffect(() => {
 //     const fetchLowStockItems = async () => {
@@ -22,6 +25,22 @@
 
 //     fetchLowStockItems();
 //   }, []);
+
+//   const totalPages = Math.ceil(lowStockItems.length / ITEMS_PER_PAGE);
+//   const indexOfLastItem = currentPage * ITEMS_PER_PAGE;
+//   const indexOfFirstItem = indexOfLastItem - ITEMS_PER_PAGE;
+//   const currentItems = lowStockItems.slice(indexOfFirstItem, indexOfLastItem);
+
+//   const handlePageChange = (direction) => {
+//     setCurrentPage((prev) => {
+//       if (direction === "prev") {
+//         return Math.max(1, prev - 1);
+//       } else if (direction === "next") {
+//         return Math.min(totalPages, prev + 1);
+//       }
+//       return prev;
+//     });
+//   };
 
 //   // Render loading state
 //   if (loading) {
@@ -45,7 +64,7 @@
 //   return (
 //     <div className="container mx-auto p-6">
 //       <h1 className="text-3xl font-bold text-gray-800 mb-6">Low Stock Items</h1>
-//       {lowStockItems.length > 0 ? (
+//       {currentItems.length > 0 ? (
 //         <div className="overflow-x-auto">
 //           <table className="table-auto w-full border-collapse border border-gray-200 shadow-md rounded-lg">
 //             <thead className="bg-gray-100">
@@ -65,7 +84,7 @@
 //               </tr>
 //             </thead>
 //             <tbody>
-//               {lowStockItems.map((item, index) => (
+//               {currentItems.map((item, index) => (
 //                 <tr
 //                   key={item._id}
 //                   className={`${
@@ -88,6 +107,28 @@
 //               ))}
 //             </tbody>
 //           </table>
+//           {/* Pagination Controls - Prev/Next only */}
+//           {totalPages > 1 && (
+//             <div className="flex justify-center items-center gap-2 mt-6">
+//               <button
+//                 className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300"
+//                 onClick={() => handlePageChange("prev")}
+//                 disabled={currentPage === 1}
+//               >
+//                 Prev
+//               </button>
+//               <span>
+//                 Page {currentPage} of {totalPages}
+//               </span>
+//               <button
+//                 className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300"
+//                 onClick={() => handlePageChange("next")}
+//                 disabled={currentPage === totalPages}
+//               >
+//                 Next
+//               </button>
+//             </div>
+//           )}
 //         </div>
 //       ) : (
 //         <div className="text-center mt-10 text-lg font-medium text-gray-600">
@@ -99,6 +140,7 @@
 // };
 
 // export default LowStockItems;
+
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
@@ -109,6 +151,7 @@ const LowStockItems = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [search, setSearch] = useState(""); // Search state
 
   useEffect(() => {
     const fetchLowStockItems = async () => {
@@ -127,10 +170,15 @@ const LowStockItems = () => {
     fetchLowStockItems();
   }, []);
 
-  const totalPages = Math.ceil(lowStockItems.length / ITEMS_PER_PAGE);
+  // Filter items by search
+  const filteredItems = lowStockItems.filter(item =>
+    item.name?.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const totalPages = Math.ceil(filteredItems.length / ITEMS_PER_PAGE);
   const indexOfLastItem = currentPage * ITEMS_PER_PAGE;
   const indexOfFirstItem = indexOfLastItem - ITEMS_PER_PAGE;
-  const currentItems = lowStockItems.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = filteredItems.slice(indexOfFirstItem, indexOfLastItem);
 
   const handlePageChange = (direction) => {
     setCurrentPage((prev) => {
@@ -142,6 +190,11 @@ const LowStockItems = () => {
       return prev;
     });
   };
+
+  // Reset to page 1 when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
 
   // Render loading state
   if (loading) {
@@ -165,6 +218,16 @@ const LowStockItems = () => {
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-3xl font-bold text-gray-800 mb-6">Low Stock Items</h1>
+      {/* Search Input */}
+      <div className="mb-4 flex justify-end">
+        <input
+          type="text"
+          placeholder="Search item name..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
+        />
+      </div>
       {currentItems.length > 0 ? (
         <div className="overflow-x-auto">
           <table className="table-auto w-full border-collapse border border-gray-200 shadow-md rounded-lg">

@@ -6,8 +6,6 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { FaFileExcel, FaFileWord } from "react-icons/fa";
 
-// ...existing imports...
-
 const PAGE_SIZE = 10;
 
 const ExpiredItems = () => {
@@ -16,6 +14,7 @@ const ExpiredItems = () => {
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
+  const [search, setSearch] = useState(""); // Search state
 
   const baseURL =
     import.meta.env.MODE === "development"
@@ -27,13 +26,12 @@ const ExpiredItems = () => {
     try {
       const res = await axios.get(`${baseURL}/api/items/expired`);
       const data = res.data.data || res.data;
-      // Only include items that are actually expired (expiryDate <= today)
       const today = new Date();
-      // Only pick items that are expired (not low stock)
+      // Only pick items that are expired (expiryDate exists and is before today)
       return (data.items || data).filter(
         item =>
           item.expiryDate &&
-          new Date(item.expiryDate) <= today
+          new Date(item.expiryDate).setHours(0,0,0,0) < today.setHours(0,0,0,0)
       );
     } catch {
       return [];
@@ -49,17 +47,14 @@ const ExpiredItems = () => {
         );
         const data = res.data.data || res.data;
         const today = new Date();
-        // Only pick items that are expired (not low stock)
+        // Only pick items that are expired (expiryDate exists and is before today)
         const filtered = (data.items || data).filter(
           item =>
             item.expiryDate &&
-            new Date(item.expiryDate) <= today
+            new Date(item.expiryDate).setHours(0,0,0,0) < today.setHours(0,0,0,0)
         );
         setExpiredItems(filtered);
-        setTotalItems(data.total
-          ? filtered.length
-          : filtered.length
-        );
+        setTotalItems(filtered.length);
       } catch (err) {
         setError("Failed to fetch expired items.");
       } finally {
@@ -69,10 +64,20 @@ const ExpiredItems = () => {
     fetchExpired();
   }, [baseURL, page]);
 
-  const totalPages = Math.ceil(totalItems / PAGE_SIZE);
+  // Filter by search
+  const filteredItems = expiredItems.filter(item =>
+    item.name?.toLowerCase().includes(search.toLowerCase())
+  );
 
-  // ...existing export handlers and render code...
-  // (No changes needed below this line)
+  const totalPages = Math.ceil(filteredItems.length / PAGE_SIZE);
+  const indexOfLastItem = page * PAGE_SIZE;
+  const indexOfFirstItem = indexOfLastItem - PAGE_SIZE;
+  const currentItems = filteredItems.slice(indexOfFirstItem, indexOfLastItem);
+
+  // Reset to page 1 when search changes
+  useEffect(() => {
+    setPage(1);
+  }, [search]);
 
   // Export to Excel
   const handleExportExcel = async () => {
@@ -156,12 +161,22 @@ const ExpiredItems = () => {
           </button>
         </div>
       </div>
+      {/* Search Input */}
+      <div className="mb-4 flex justify-end">
+        <input
+          type="text"
+          placeholder="Search item name..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
+        />
+      </div>
       {loading && <div>Loading expired items...</div>}
       {error && <div className="text-red-600">{error}</div>}
-      {!loading && !error && expiredItems.length === 0 && (
+      {!loading && !error && filteredItems.length === 0 && (
         <div className="text-gray-500">No expired items found.</div>
       )}
-      {!loading && !error && expiredItems.length > 0 && (
+      {!loading && !error && filteredItems.length > 0 && (
         <div className="overflow-x-auto">
           <table className="min-w-full bg-white border border-gray-200 rounded">
             <thead>
@@ -175,7 +190,7 @@ const ExpiredItems = () => {
               </tr>
             </thead>
             <tbody>
-              {expiredItems.map((item, idx) => (
+              {currentItems.map((item, idx) => (
                 <tr key={item._id} className="hover:bg-gray-50">
                   <td className="px-4 py-2 border-b">
                     {(page - 1) * PAGE_SIZE + idx + 1}

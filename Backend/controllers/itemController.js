@@ -166,11 +166,14 @@ export const updateItem = async (req, res) => {
 export const getExpiredItems = async (req, res) => {
   try {
     const today = new Date();
-    // Only get items that have an expiryDate and are expired (expiryDate <= today)
+    today.setHours(0, 0, 0, 0); // Set to midnight for accurate comparison
+
+    // Only get items that have an expiryDate and are expired (expiryDate < today)
     // Exclude items that do NOT have an expiryDate (i.e., only get expired items)
     const expiredItems = await Item.find({
-      expiryDate: { $exists: true, $ne: null, $lte: today }
+      expiryDate: { $exists: true, $ne: null, $lt: today }
     });
+
     res.status(200).json({ success: true, data: expiredItems });
   } catch (error) {
     console.error("Error fetching expired items:", error);
