@@ -6,14 +6,13 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { FaFileExcel, FaFileWord } from "react-icons/fa";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 6;
 
 const ExpiredItems = () => {
   const [expiredItems, setExpiredItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [page, setPage] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState(""); // Search state
 
   const baseURL =
@@ -43,7 +42,7 @@ const ExpiredItems = () => {
       try {
         setLoading(true);
         const res = await axios.get(
-          `${baseURL}/api/items/expired?page=${page}&limit=${PAGE_SIZE}`
+          `${baseURL}/api/items/expired?page=${currentPage}&limit=${PAGE_SIZE}`
         );
         const data = res.data.data || res.data;
         const today = new Date();
@@ -54,7 +53,6 @@ const ExpiredItems = () => {
             new Date(item.expiryDate).setHours(0,0,0,0) < today.setHours(0,0,0,0)
         );
         setExpiredItems(filtered);
-        setTotalItems(filtered.length);
       } catch (err) {
         setError("Failed to fetch expired items.");
       } finally {
@@ -62,7 +60,7 @@ const ExpiredItems = () => {
       }
     };
     fetchExpired();
-  }, [baseURL, page]);
+  }, [baseURL, currentPage]);
 
   // Filter by search
   const filteredItems = expiredItems.filter(item =>
@@ -70,13 +68,13 @@ const ExpiredItems = () => {
   );
 
   const totalPages = Math.ceil(filteredItems.length / PAGE_SIZE);
-  const indexOfLastItem = page * PAGE_SIZE;
+  const indexOfLastItem = currentPage * PAGE_SIZE;
   const indexOfFirstItem = indexOfLastItem - PAGE_SIZE;
   const currentItems = filteredItems.slice(indexOfFirstItem, indexOfLastItem);
 
   // Reset to page 1 when search changes
   useEffect(() => {
-    setPage(1);
+    setCurrentPage(1);
   }, [search]);
 
   // Export to Excel
@@ -142,10 +140,23 @@ const ExpiredItems = () => {
     saveAs(blob, "expired_items.doc");
   };
 
+  // Pagination controls
+  const handlePageChange = (direction) => {
+    setCurrentPage((prev) => {
+      if (direction === "prev") {
+        return Math.max(1, prev - 1);
+      } else if (direction === "next") {
+        return Math.min(totalPages, prev + 1);
+      }
+      return prev;
+    });
+  };
+
   return (
-    <div className="p-6">
+    <div className="container mx-auto p-6">
+      <h1 className="text-3xl font-bold text-gray-800 mb-6">Expired Products</h1>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
-        <h1 className="text-2xl font-semibold">Expired Products</h1>
+        <div></div>
         <div className="flex gap-2">
           <button
             onClick={handleExportExcel}
@@ -171,66 +182,100 @@ const ExpiredItems = () => {
           className="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
         />
       </div>
-      {loading && <div>Loading expired items...</div>}
-      {error && <div className="text-red-600">{error}</div>}
-      {!loading && !error && filteredItems.length === 0 && (
-        <div className="text-gray-500">No expired items found.</div>
+      {loading && (
+        <div className="flex justify-center items-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
       )}
-      {!loading && !error && filteredItems.length > 0 && (
+      {error && (
+        <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded">
+          <p className="text-sm text-red-700">{error}</p>
+        </div>
+      )}
+      {!loading && !error && currentItems.length === 0 && (
+        <div className="text-center mt-10 text-lg font-medium text-gray-600">
+          No expired items found.
+        </div>
+      )}
+      {!loading && !error && currentItems.length > 0 && (
         <div className="overflow-x-auto">
-          <table className="min-w-full bg-white border border-gray-200 rounded">
-            <thead>
+          <table className="table-auto w-full border-collapse border border-gray-200 shadow-md rounded-lg">
+            <thead className="bg-gray-100">
               <tr>
-                <th className="px-4 py-2 border-b">#</th>
-                <th className="px-4 py-2 border-b">Name</th>
-                <th className="px-4 py-2 border-b">Category</th>
-                <th className="px-4 py-2 border-b">Stock</th>
-                <th className="px-4 py-2 border-b">Expiry Date</th>
-                <th className="px-4 py-2 border-b">Item Code</th>
+                <th className="border border-gray-300 px-6 py-3 text-left text-sm font-medium text-gray-700">
+                  #
+                </th>
+                <th className="border border-gray-300 px-6 py-3 text-left text-sm font-medium text-gray-700">
+                  Name
+                </th>
+                <th className="border border-gray-300 px-6 py-3 text-left text-sm font-medium text-gray-700">
+                  Category
+                </th>
+                <th className="border border-gray-300 px-6 py-3 text-left text-sm font-medium text-gray-700">
+                  Stock
+                </th>
+                <th className="border border-gray-300 px-6 py-3 text-left text-sm font-medium text-gray-700">
+                  Expiry Date
+                </th>
+                <th className="border border-gray-300 px-6 py-3 text-left text-sm font-medium text-gray-700">
+                  Item Code
+                </th>
               </tr>
             </thead>
             <tbody>
               {currentItems.map((item, idx) => (
-                <tr key={item._id} className="hover:bg-gray-50">
-                  <td className="px-4 py-2 border-b">
-                    {(page - 1) * PAGE_SIZE + idx + 1}
+                <tr
+                  key={item._id}
+                  className={`${
+                    idx % 2 === 0 ? "bg-white" : "bg-gray-50"
+                  } hover:bg-gray-100 transition`}
+                >
+                  <td className="border border-gray-300 px-6 py-4 text-sm text-gray-800">
+                    {(currentPage - 1) * PAGE_SIZE + idx + 1}
                   </td>
-                  <td className="px-4 py-2 border-b">{item.name}</td>
-                  <td className="px-4 py-2 border-b">{item.category}</td>
-                  <td className="px-4 py-2 border-b">{item.openingQty}</td>
-                  <td className="px-4 py-2 border-b">
+                  <td className="border border-gray-300 px-6 py-4 text-sm text-gray-800">
+                    {item.name}
+                  </td>
+                  <td className="border border-gray-300 px-6 py-4 text-sm text-gray-800">
+                    {item.category}
+                  </td>
+                  <td className="border border-gray-300 px-6 py-4 text-sm text-gray-800">
+                    {item.openingQty}
+                  </td>
+                  <td className="border border-gray-300 px-6 py-4 text-sm text-gray-800">
                     {item.expiryDate
                       ? new Date(item.expiryDate).toLocaleDateString()
                       : "N/A"}
                   </td>
-                  <td className="px-4 py-2 border-b">{item.itemCode}</td>
+                  <td className="border border-gray-300 px-6 py-4 text-sm text-gray-800">
+                    {item.itemCode}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
-        </div>
-      )}
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex justify-center items-center gap-2 mt-6">
-          <button
-            className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300"
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page === 1}
-          >
-            Prev
-          </button>
-          <span>
-            Page {page} of {totalPages}
-          </span>
-          <button
-            className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300"
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            disabled={page === totalPages}
-          >
-            Next
-          </button>
+          {/* Pagination Controls - Prev/Next only */}
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center gap-2 mt-6">
+              <button
+                className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300"
+                onClick={() => handlePageChange("prev")}
+                disabled={currentPage === 1}
+              >
+                Prev
+              </button>
+              <span>
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300"
+                onClick={() => handlePageChange("next")}
+                disabled={currentPage === totalPages}
+              >
+                Next
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
