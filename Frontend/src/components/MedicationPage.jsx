@@ -23,13 +23,10 @@ const MedicationPage = () => {
         let itemsArray = [];
 
         if (Array.isArray(responseData)) {
-          // Case 1: Response is already an array
           itemsArray = responseData;
         } else if (Array.isArray(responseData?.data)) {
-          // Case 2: Response has data array
           itemsArray = responseData.data;
         } else if (responseData?.items) {
-          // Case 3: Response has items property
           itemsArray = responseData.items;
         }
 
@@ -74,8 +71,15 @@ const MedicationPage = () => {
     setCurrentPage(1);
   }, [search]);
 
-  const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
+  const handlePageChange = (direction) => {
+    setCurrentPage((prev) => {
+      if (direction === "prev") {
+        return Math.max(1, prev - 1);
+      } else if (direction === "next") {
+        return Math.min(totalPages, prev + 1);
+      }
+      return prev;
+    });
   };
 
   const handleItemDelete = async (itemId) => {
@@ -131,6 +135,28 @@ const MedicationPage = () => {
         totalPages={totalPages}
         onItemDelete={handleItemDelete}
       />
+      {/* Pagination Controls - Prev/Next only */}
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center gap-2 mt-6">
+          <button
+            className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300"
+            onClick={() => handlePageChange("prev")}
+            disabled={currentPage === 1}
+          >
+            Prev
+          </button>
+          <span>
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300"
+            onClick={() => handlePageChange("next")}
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 };
