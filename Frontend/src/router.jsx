@@ -12,6 +12,9 @@ import AdjustStockPage from "./pages/AdjustStockPage";
 import LowStockPage from "./pages/LowStockPage";
 import ItemCategoryPage from "./pages/ItemCategoryPage";
 import ExpiredItems from "./pages/ExpiredItemPage";
+import SkinCarePage from "./pages/SkinCarePage";
+import MedicationFridgePage from "./pages/MedicationFridgePage";
+import AparatusPage from "./pages/AparatusPage";
 
 // Protected Route as a Component
 const ProtectedRoute = ({ children }) => {
@@ -38,6 +41,9 @@ const router = createBrowserRouter([
       { path: "/dashboard/inventory/medication", element: <MedicationPage /> },
       { path: "/dashboard/inventory/consumables", element: <ConsumablePage /> },
       { path: "/dashboard/inventory/general", element: <GeneralPage /> },
+      { path: "/dashboard/inventory/skincare", element: <SkinCarePage /> },
+      { path: "/dashboard/inventory/medication-fridge", element: <MedicationFridgePage /> },
+      { path: "/dashboard/inventory/aparatus", element: <AparatusPage /> },
       { path: "Low-stock", element: <LowStockPage /> },
       { path: "categories", element: <ItemCategoryPage /> },
       { path: "expired-products", element: <ExpiredItems /> },
