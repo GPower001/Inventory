@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import StockTable from "./StockTable";
+import EditNameModal from "../components/EditNameModal";
 import api from "../utils/api";
 import { useAuthStore } from "../store/useAuthStore";
 
@@ -26,6 +27,7 @@ const Popup = ({ message, type, onClose }) => (
 const MedicationPage = () => {
   const { token, branchId, isLoggedIn } = useAuthStore();
   const [items, setItems] = useState([]);
+  const [editItem, setEditItem] = useState(null); // item to edit name
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
   const [loading, setLoading] = useState(true);
@@ -137,6 +139,17 @@ const MedicationPage = () => {
     setTimeout(() => setPopup(null), 3000);
   };
 
+  // Called from StockTable when user selects Edit Name
+    const handleEditName = (item) => {
+      setEditItem(item);
+    };
+
+    // When EditNameModal saves, update local list
+    const handleNameSaved = (updatedItem) => {
+      setItems((prev) => prev.map((it) => (it._id === updatedItem._id ? updatedItem : it)));
+    };
+
+
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
@@ -200,7 +213,11 @@ const MedicationPage = () => {
         itemsPerPage={itemsPerPage}
         handlePageChange={handlePageChange}
         totalPages={totalPages}
-        onItemDelete={handleItemDelete}
+        onEditName={handleEditName}
+        onDeleteRequest={(item) => {
+          setDeleteItem(item);
+          setShowConfirm(true);
+        }}
       />
 
       {/* ✅ Pagination */}
@@ -226,60 +243,74 @@ const MedicationPage = () => {
         </div>
       )}
 
-      {/* ✅ Delete Confirmation Modal */}
-      {showConfirm && deleteItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-          <div className="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full border-t-8 border-red-500 relative">
-            <div className="flex items-center mb-4">
-              <div className="flex-shrink-0 bg-red-100 rounded-full p-2 mr-3">
-                <svg
-                  className="w-7 h-7 text-red-600"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 9v2m0 4h.01M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"
-                  />
-                </svg>
-              </div>
-              <h2 className="text-xl font-bold text-red-700">
-                Confirm Deletion
-              </h2>
-            </div>
-            <p className="mb-6 text-gray-700 text-base">
-              Are you sure you want to delete{" "}
-              <span className="font-semibold">{deleteItem.name}</span>? <br />
-              <span className="text-red-600 font-medium">
-                This action cannot be undone.
-              </span>
-            </p>
-            <div className="flex justify-end gap-3">
+      {/* Delete Confirmation Modal */}
+        {showConfirm && deleteItem && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6 relative animate-fadeIn">
+              
+              {/* Close button */}
               <button
                 onClick={cancelDelete}
-                className="px-4 py-2 rounded bg-gray-200 text-gray-800 hover:bg-gray-300 transition"
+                className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition"
+                aria-label="Close"
               >
-                Cancel
+                &times;
               </button>
-              <button
-                onClick={confirmDelete}
-                className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700 transition font-semibold shadow"
-              >
-                Delete
-              </button>
+
+              {/* Header */}
+              <div className="text-center mb-4">
+                <div className="mx-auto w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mb-3">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-6 h-6 text-red-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={2}
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z"
+                    />
+                  </svg>
+                </div>
+                <h2 className="text-lg font-semibold text-gray-800">Delete Item</h2>
+                <p className="text-sm text-gray-600 mt-1">
+                  Are you sure you want to delete{" "}
+                  <span className="font-medium text-gray-900">{deleteItem.name}</span>?
+                  This action cannot be undone.
+                </p>
+              </div>
+
+              {/* Buttons */}
+              <div className="flex justify-center gap-3 mt-6">
+                <button
+                  onClick={cancelDelete}
+                  className="px-4 py-2.5 rounded-lg bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDelete}
+                  className="px-4 py-2.5 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 shadow-sm transition"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
-            <button
-              onClick={cancelDelete}
-              className="absolute top-3 right-3 text-gray-400 hover:text-gray-700 text-2xl font-bold focus:outline-none"
-              aria-label="Close"
-            >
-              &times;
-            </button>
           </div>
-        </div>
+        )}
+
+
+      {/* Edit Name Modal */}
+      {editItem && (
+        <EditNameModal
+          item={editItem}
+          onClose={() => setEditItem(null)}
+          onSaved={handleNameSaved}
+          showPopup={showPopup}
+        />
       )}
     </div>
   );

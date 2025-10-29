@@ -23,12 +23,16 @@ const itemSchema = new mongoose.Schema(
     openingQty: { type: Number, required: true },
     minStock: { type: Number, required: true },
     itemCode: { type: String, required: true }, // remove global unique
+    price: { type: Number },
     imageUrl: { type: String },
     expiryDate: { type: Date },
     branchId: { type: mongoose.Schema.Types.ObjectId, ref: "Branch", required: true },
   },
   { timestamps: true }
 );
+
+// ✅ Ensure uniqueness per branch for (name + category)
+itemSchema.index({ name: 1, category: 1, branchId: 1 }, { unique: true });
 
 // ✅ Compound index: itemCode must be unique only within a branch
 itemSchema.index({ itemCode: 1, branchId: 1 }, { unique: true });

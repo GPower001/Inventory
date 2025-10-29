@@ -146,7 +146,7 @@ const ItemCategoryPage = () => {
                 : "bg-gray-200 text-gray-700"
             } hover:bg-teal-600 hover:text-white`}
           >
-            {category}
+            {category.charAt(0).toUpperCase() + category.slice(1).toLowerCase()}
           </button>
         ))}
       </div>

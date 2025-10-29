@@ -52,7 +52,7 @@ const io = new Server(server, {
             "http://localhost:5173", // Local development frontend
             process.env.FRONTEND_URL, // Add production URL from env
         ],
-        methods: ["GET", "POST"],
+        methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
         credentials: true,
     },
     transports: ["websocket", "polling"],

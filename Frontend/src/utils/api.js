@@ -15,7 +15,7 @@ import { useAuthStore } from "../store/useAuthStore"; // adjust path if needed
 
 // Always hit backend API through /api
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
+  baseURL: import.meta.env.VITE_API_URL_DEV || "http://localhost:5000",
   withCredentials: true,
 });
 
@@ -39,3 +39,34 @@ api.interceptors.request.use(
 
 export default api;
 
+
+
+// import axios from "axios";
+// import { useAuthStore } from "../store/useAuthStore";
+
+// // Detect environment
+// const isProd = import.meta.env.MODE === "production";
+
+// const api = axios.create({
+//   baseURL: isProd
+//     ? "https://inventory-sycr.onrender.com/api" // ✅ Production
+//     : "http://localhost:5000/api",             // ✅ Local Dev
+//   withCredentials: true,
+// });
+
+// // Attach token + branchId from store/localStorage
+// api.interceptors.request.use(
+//   (config) => {
+//     const token = useAuthStore.getState().token || localStorage.getItem("token");
+//     const branchId =
+//       useAuthStore.getState().branchId || localStorage.getItem("branchId");
+
+//     if (token) config.headers.Authorization = `Bearer ${token}`;
+//     if (branchId) config.headers["x-branch-id"] = branchId;
+
+//     return config;
+//   },
+//   (error) => Promise.reject(error)
+// );
+
+// export default api;

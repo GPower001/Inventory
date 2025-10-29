@@ -353,6 +353,14 @@
 // };
 
 // export default Login;
+
+
+
+
+
+
+
+
 // import React, { useState, useEffect } from "react";
 // import "bootstrap/dist/css/bootstrap.min.css";
 // import "bootstrap/dist/js/bootstrap.bundle.min";
@@ -836,6 +844,512 @@
 // }
 
 // export default Login;
+
+
+
+
+
+
+
+// import React, { useState, useEffect } from "react";
+// import "bootstrap/dist/css/bootstrap.min.css";
+// import "bootstrap/dist/js/bootstrap.bundle.min";
+// import "./login.css";
+// import api from "../utils/api";
+// import { useAuthStore } from "../store/useAuthStore";
+
+// function Login() {
+//   const { setAuth } = useAuthStore();
+//   const [isRegistering, setIsRegistering] = useState(false);
+//   const [formData, setFormData] = useState({
+//     name: "",
+//     password: "",
+//     branchId: "",
+//     role: "Nurse",
+//   });
+//   const [branches, setBranches] = useState([]);
+//   const [loading, setLoading] = useState(false);
+//   const [error, setError] = useState("");
+
+//   // ✅ Fetch branches on mount (needed for registration)
+//   useEffect(() => {
+//     const fetchBranches = async () => {
+//       try {
+//         const res = await api.get("/branches");
+//         setBranches(res.data?.data || []); // backend returns { success, data }
+//       } catch (err) {
+//         console.error("Error fetching branches:", err);
+//         setBranches([]);
+//       }
+//     };
+//     fetchBranches();
+//   }, []);
+
+//   const handleChange = (e) => {
+//     setFormData({ ...formData, [e.target.name]: e.target.value });
+//   };
+
+//   const handleSubmit = async (e, type) => {
+//     e.preventDefault();
+//     setLoading(true);
+//     setError("");
+
+//     try {
+//       const endpoint = type === "register" ? "/auth/register" : "/auth/login";
+
+//       const payload =
+//         type === "register"
+//           ? {
+//               name: formData.name,
+//               password: formData.password,
+//               role: formData.role,
+//               branchId: formData.branchId || undefined, // user selects branch at registration
+//             }
+//           : {
+//               name: formData.name,
+//               password: formData.password,
+//               role: formData.role,
+//             };
+
+//       const response = await api.post(endpoint, payload, { withCredentials: true });
+
+//       alert(response.data.message || "Success!");
+
+//       if (type === "login") {
+//         const user = response.data.user;
+//         const token = response.data.token;
+
+//         // ✅ Use branch from backend, not user input
+//         const branchId = user.branchId?._id || user.branchId;
+
+//         // Save auth data
+//         setAuth({ user, token, branchId });
+//         localStorage.setItem("token", token);
+//         localStorage.setItem("branchId", branchId);
+
+//         window.location.href = "/dashboard";
+//       }
+//     } catch (err) {
+//       setError(err.response?.data?.error || "An error occurred. Please try again.");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   return (
+//     <div
+//       className={`content d-flex shadow-lg ${isRegistering ? "active" : ""}`}
+//       id="content"
+//     >
+//       {/* Registration Form */}
+//       <div className="col-md-6 d-flex justify-content-center">
+//         <form onSubmit={(e) => handleSubmit(e, "register")}>
+//           <div className="header-text mb-4">
+//             <h1>Register</h1>
+//           </div>
+
+//           <div className="input-group mb-3">
+//             <input
+//               type="text"
+//               name="name"
+//               placeholder="Username"
+//               className="form-control form-control-lg"
+//               value={formData.name}
+//               onChange={handleChange}
+//               required
+//             />
+//           </div>
+
+//           <div className="input-group mb-3">
+//             <input
+//               type="password"
+//               name="password"
+//               placeholder="Password"
+//               className="form-control form-control-lg"
+//               value={formData.password}
+//               onChange={handleChange}
+//               required
+//             />
+//           </div>
+
+//           {/* Branch Dropdown (Register only) */}
+//           <div className="input-group mb-3">
+//             <select
+//               name="branchId"
+//               className="form-control form-control-lg"
+//               value={formData.branchId}
+//               onChange={handleChange}
+//               required
+//             >
+//               <option value="">Select Branch</option>
+//               {branches.map((b) => (
+//                 <option key={b._id} value={b._id}>
+//                   {b.name}
+//                 </option>
+//               ))}
+//             </select>
+//           </div>
+
+//           {/* Role Selection */}
+//           <div className="input-group mb-3">
+//             <select
+//               name="role"
+//               className="form-control form-control-lg"
+//               value={formData.role}
+//               onChange={handleChange}
+//               required
+//             >
+//               <option value="Nurse">Nurse</option>
+//               <option value="Doctor">Doctor</option>
+//               <option value="Admin">Admin</option>
+//             </select>
+//           </div>
+
+//           {error && <p className="text-danger">{error}</p>}
+//           <div className="input-group mb-3 justify-content-center">
+//             <button
+//               type="submit"
+//               className="btn border-white text-white w-50 fs-6"
+//               disabled={loading}
+//             >
+//               {loading ? "Registering..." : "REGISTER"}
+//             </button>
+//           </div>
+//         </form>
+//       </div>
+
+//       {/* Login Form */}
+//       <div className={`col-md-6 right-box ${isRegistering ? "d-none" : ""}`}>
+//         <form onSubmit={(e) => handleSubmit(e, "login")}>
+//           <div className="header-text mb-4">
+//             <h1>Log In</h1>
+//           </div>
+
+//           <div className="input-group mb-3">
+//             <input
+//               type="text"
+//               name="name"
+//               placeholder="Username"
+//               className="form-control form-control-lg"
+//               value={formData.name}
+//               onChange={handleChange}
+//               required
+//             />
+//           </div>
+
+//           <div className="input-group mb-3">
+//             <input
+//               type="password"
+//               name="password"
+//               placeholder="Password"
+//               className="form-control form-control-lg"
+//               value={formData.password}
+//               onChange={handleChange}
+//               required
+//             />
+//           </div>
+
+//           {/* 🚫 Removed Branch Selection from Login */}
+
+//           {/* Role Selection (Login) */}
+//           <div className="input-group mb-3">
+//             <select
+//               name="role"
+//               className="form-control form-control-lg"
+//               value={formData.role}
+//               onChange={handleChange}
+//               required
+//             >
+//               <option value="Nurse">Nurse</option>
+//               <option value="Doctor">Doctor</option>
+//               <option value="Admin">Admin</option>
+//             </select>
+//           </div>
+
+//           {error && <p className="text-danger">{error}</p>}
+//           <div className="input-group mb-3 justify-content-center">
+//             <button
+//               type="submit"
+//               className="btn border-white text-white w-50 fs-6"
+//               disabled={loading}
+//             >
+//               {loading ? "Logging in..." : "LOGIN"}
+//             </button>
+//           </div>
+//         </form>
+//       </div>
+
+//       {/* Switch Panel */}
+//       <div className="switch-content">
+//         <div className="switch">
+//           <div className="switch-panel switch-left">
+//             <h1>Hello</h1>
+//             <p>We are happy to see you back</p>
+//             <button
+//               className="btn border-white text-white w-50 fs-6"
+//               onClick={() => setIsRegistering(false)}
+//             >
+//               LOGIN
+//             </button>
+//           </div>
+//           <div className="switch-panel switch-right">
+//             <h1>Welcome</h1>
+//             <p>Sign Up</p>
+//             <button
+//               className="btn border-white text-white w-50 fs-6"
+//               onClick={() => setIsRegistering(true)}
+//             >
+//               REGISTER
+//             </button>
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+
+// export default Login;
+
+// import React, { useState, useEffect } from "react";
+// import "bootstrap/dist/css/bootstrap.min.css";
+// import "bootstrap/dist/js/bootstrap.bundle.min";
+// import "./login.css";
+// import api from "../utils/api";
+// import { useAuthStore } from "../store/useAuthStore";
+
+// function Login() {
+//   const { setAuth } = useAuthStore();
+//   const [isRegistering, setIsRegistering] = useState(false);
+//   const [formData, setFormData] = useState({
+//     name: "",
+//     password: "",
+//     branchId: "",
+//     role: "Nurse",
+//   });
+//   const [branches, setBranches] = useState([]);
+//   const [loading, setLoading] = useState(false);
+//   const [error, setError] = useState("");
+
+//   // ✅ Fetch branches on mount (for registration)
+//   useEffect(() => {
+//     const fetchBranches = async () => {
+//       try {
+//         const res = await api.get("/api/branches");
+//         console.log("Branches response:", res.data);
+//         setBranches(res.data?.data || []);
+//       } catch (err) {
+//         console.error("Error fetching branches:", err);
+//         setBranches([]);
+//       }
+//     };
+//     fetchBranches();
+//   }, []);
+
+//   const handleChange = (e) => {
+//     setFormData({ ...formData, [e.target.name]: e.target.value });
+//   };
+
+//   const handleSubmit = async (e, type) => {
+//     e.preventDefault();
+//     setLoading(true);
+//     setError("");
+
+//     try {
+//       const endpoint = type === "register" ? "/auth/register" : "/auth/login";
+
+//       const payload =
+//         type === "register"
+//           ? {
+//               name: formData.name,
+//               password: formData.password,
+//               role: formData.role,
+//               // ✅ Only send branchId if not Admin
+//               ...(formData.role !== "Admin" && { branchId: formData.branchId }),
+//             }
+//           : {
+//               name: formData.name,
+//               password: formData.password, // ✅ no role here
+//             };
+
+//       const response = await api.post(endpoint, payload, { withCredentials: true });
+
+//       alert(response.data.message || "Success!");
+
+//       if (type === "login") {
+//         const user = response.data.user;
+//         const token = response.data.token;
+
+//         // ✅ Use branch from backend, not from input
+//         const branchId = user.branchId?._id || user.branchId || null;
+
+//         setAuth({ user, token, branchId });
+//         localStorage.setItem("token", token);
+//         if (branchId) localStorage.setItem("branchId", branchId);
+
+//         window.location.href = "/dashboard";
+//       }
+//     } catch (err) {
+//       setError(err.response?.data?.error || "An error occurred. Please try again.");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   return (
+//     <div className={`content d-flex shadow-lg ${isRegistering ? "active" : ""}`} id="content">
+//       {/* Registration Form */}
+//       <div className="col-md-6 d-flex justify-content-center">
+//         <form onSubmit={(e) => handleSubmit(e, "register")}>
+//           <div className="header-text mb-4">
+//             <h1>Register</h1>
+//           </div>
+
+//           <div className="input-group mb-3">
+//             <input
+//               type="text"
+//               name="name"
+//               placeholder="Username"
+//               className="form-control form-control-lg"
+//               value={formData.name}
+//               onChange={handleChange}
+//               required
+//             />
+//           </div>
+
+//           <div className="input-group mb-3">
+//             <input
+//               type="password"
+//               name="password"
+//               placeholder="Password"
+//               className="form-control form-control-lg"
+//               value={formData.password}
+//               onChange={handleChange}
+//               required
+//             />
+//           </div>
+
+//           {/* ✅ Branch Dropdown only if not Admin */}
+//           {formData.role !== "Admin" && (
+//             <div className="input-group mb-3">
+//               <select
+//                 name="branchId"
+//                 className="form-control form-control-lg"
+//                 value={formData.branchId}
+//                 onChange={handleChange}
+//                 required
+//               >
+//                 <option value="">Select Branch</option>
+//                 {branches.map((b) => (
+//                   <option key={b._id} value={b._id}>
+//                     {b.name}
+//                   </option>
+//                 ))}
+//               </select>
+//             </div>
+//           )}
+
+//           {/* Role Selection */}
+//           <div className="input-group mb-3">
+//             <select
+//               name="role"
+//               className="form-control form-control-lg"
+//               value={formData.role}
+//               onChange={handleChange}
+//               required
+//             >
+//               <option value="Nurse">Nurse</option>
+//               <option value="Doctor">Doctor</option>
+//               <option value="Admin">Admin</option>
+//             </select>
+//           </div>
+
+//           {error && <p className="text-danger">{error}</p>}
+//           <div className="input-group mb-3 justify-content-center">
+//             <button type="submit" className="btn border-white text-white w-50 fs-6" disabled={loading}>
+//               {loading ? "Registering..." : "REGISTER"}
+//             </button>
+//           </div>
+//         </form>
+//       </div>
+
+//       {/* Login Form */}
+//       <div className={`col-md-6 right-box ${isRegistering ? "d-none" : ""}`}>
+//         <form onSubmit={(e) => handleSubmit(e, "login")}>
+//           <div className="header-text mb-4">
+//             <h1>Log In</h1>
+//           </div>
+
+//           <div className="input-group mb-3">
+//             <input
+//               type="text"
+//               name="name"
+//               placeholder="Username"
+//               className="form-control form-control-lg"
+//               value={formData.name}
+//               onChange={handleChange}
+//               required
+//             />
+//           </div>
+
+//           <div className="input-group mb-3">
+//             <input
+//               type="password"
+//               name="password"
+//               placeholder="Password"
+//               className="form-control form-control-lg"
+//               value={formData.password}
+//               onChange={handleChange}
+//               required
+//             />
+//           </div>
+
+//           {/* 🚫 Removed Branch Selection from Login */}
+
+//           {error && <p className="text-danger">{error}</p>}
+//           <div className="input-group mb-3 justify-content-center">
+//             <button type="submit" className="btn border-white text-white w-50 fs-6" disabled={loading}>
+//               {loading ? "Logging in..." : "LOGIN"}
+//             </button>
+//           </div>
+//         </form>
+//       </div>
+
+//       {/* Switch Panel */}
+//       <div className="switch-content">
+//         <div className="switch">
+//           <div className="switch-panel switch-left">
+//             <h1>Hello</h1>
+//             <p>We are happy to see you back</p>
+//             <button
+//               className="btn border-white text-white w-50 fs-6"
+//               onClick={() => setIsRegistering(false)}
+//             >
+//               LOGIN
+//             </button>
+//           </div>
+//           <div className="switch-panel switch-right">
+//             <h1>Welcome</h1>
+//             <p>Sign Up</p>
+//             <button
+//               className="btn border-white text-white w-50 fs-6"
+//               onClick={() => setIsRegistering(true)}
+//             >
+//               REGISTER
+//             </button>
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+
+// export default Login;
+
+
+
+
+
+
 
 import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";

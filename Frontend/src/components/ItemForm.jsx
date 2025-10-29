@@ -33,7 +33,7 @@ const ItemForm = () => {
     setError(null); // Reset error state
     
     // Validate required fields (adjust according to your API requirements)
-    if (!item.itemName || !item.category || !item.units) {
+    if (!item.itemName || !item.category || !item.units || !item.minStock) {
       setError('Please fill in all required fields');
       return;
     }

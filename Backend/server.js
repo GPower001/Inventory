@@ -1,8 +1,7 @@
 import dotenv from "dotenv";
-import http from "http";
 import path from "path";
-import { Server } from "socket.io";
-import express from "express";
+import { app, server, io } from "./utils/socket.js";
+import express from "express"
 import cors from "cors";
 import cron from "node-cron";
 
@@ -28,7 +27,7 @@ connectDB().catch((err) => {
 // --------------------
 // Express app
 // --------------------
-const app = express();
+
 
 // --------------------
 // CORS setup
@@ -66,22 +65,6 @@ app.use("/api/items", itemRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/branches", branchRoutes);
 
-// --------------------
-// HTTP Server + Socket.IO
-// --------------------
-const server = http.createServer(app);
-
-export const io = new Server(server, {
-  cors: {
-    origin: allowedOrigins,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-    credentials: true,
-  },
-  transports: ["websocket", "polling"],
-  allowUpgrades: true,
-  pingTimeout: 60000,
-  pingInterval: 25000,
-});
 
 io.on("connection", (socket) => {
   console.log("✅ New client connected:", socket.id);
@@ -133,6 +116,9 @@ app.use((err, req, res, next) => {
 // --------------------
 // Start server
 // --------------------
+
+console.log("JWT_SECRET loaded:", process.env.JWT_SECRET ? "✅ Yes" : "❌ No");
+
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
