@@ -19,7 +19,7 @@
 import express from "express";
 import { authenticate } from "../middlewares/authMiddleware.js"; // Use your actual path
 import  adminOnly  from "../middlewares/adminOnly.js"; // Use your actual path
-import * as adminController from "../controllers/adminController.js";
+import * as adminController from "../controllers/AdminController.js";
 
 const router = express.Router();
 
