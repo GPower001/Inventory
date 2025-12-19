@@ -90,7 +90,7 @@
 import express from "express";
 import { register, login, getAllUsers, updateUser, deleteUser } from "../controllers/authController.js";
 import { authenticate } from "../middlewares/authMiddleware.js";
-import adminOnly from "../middlewares/AdminOnly.js";
+import adminOnly from "../middlewares/adminOnly.js";
 
 const router = express.Router();
 
