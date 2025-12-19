@@ -161,8 +161,8 @@ export default function AccountingReport() {
       m.itemId?.category || "N/A",
       m.movementType,
       m.quantity,
-      `$${(m.itemPrice || 0).toFixed(2)}`,
-      `$${((m.itemPrice || 0) * (m.quantity || 0)).toFixed(2)}`,
+      `₦${(m.itemPrice || 0).toFixed(2)}`,
+      `₦${((m.itemPrice || 0) * (m.quantity || 0)).toFixed(2)}`,
       m.branchId?.name || "Unknown"
     ]);
 
@@ -186,7 +186,7 @@ export default function AccountingReport() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-              <DollarSign className="w-8 h-8 text-teal-600" />
+              <BarChart3 className="w-8 h-8 text-teal-600" />
               Accounting Report
             </h1>
             <p className="text-gray-600 mt-2">Financial analysis of inventory movements</p>
@@ -293,7 +293,7 @@ export default function AccountingReport() {
             <p className="text-sm text-gray-600">Stock Added Value</p>
             <TrendingUp className="w-5 h-5 text-green-600" />
           </div>
-          <p className="text-3xl font-bold text-green-600">${totalAddedValue.toFixed(2)}</p>
+          <p className="text-3xl font-bold text-green-600">₦{totalAddedValue.toFixed(2)}</p>
           <p className="text-xs text-gray-500 mt-1">{totalAddedQty} units added</p>
         </div>
 
@@ -302,17 +302,17 @@ export default function AccountingReport() {
             <p className="text-sm text-gray-600">Stock Removed Value</p>
             <TrendingDown className="w-5 h-5 text-red-600" />
           </div>
-          <p className="text-3xl font-bold text-red-600">${totalRemovedValue.toFixed(2)}</p>
+          <p className="text-3xl font-bold text-red-600">₦{totalRemovedValue.toFixed(2)}</p>
           <p className="text-xs text-gray-500 mt-1">{totalRemovedQty} units removed</p>
         </div>
 
         <div className="bg-white rounded-lg shadow-sm p-6 border-l-4 border-blue-600">
           <div className="flex items-center justify-between mb-2">
             <p className="text-sm text-gray-600">Net Value Change</p>
-            <DollarSign className="w-5 h-5 text-blue-600" />
+            <TrendingUp className="w-5 h-5 text-blue-600" />
           </div>
           <p className={`text-3xl font-bold ${netValue >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>
-            {netValue >= 0 ? '+' : ''}${netValue.toFixed(2)}
+            {netValue >= 0 ? '+' : ''}₦{netValue.toFixed(2)}
           </p>
           <p className="text-xs text-gray-500 mt-1">
             {netValue >= 0 ? 'Inventory increased' : 'Inventory decreased'}
@@ -352,17 +352,17 @@ export default function AccountingReport() {
                 <tr key={category} className="hover:bg-gray-50">
                   <td className="px-4 py-3 text-sm font-medium text-gray-900">{category}</td>
                   <td className="px-4 py-3 text-sm text-right text-green-600 font-semibold">
-                    ${data.added.toFixed(2)}
+                    ₦{data.added.toFixed(2)}
                   </td>
                   <td className="px-4 py-3 text-sm text-right text-gray-600">{data.addedQty}</td>
                   <td className="px-4 py-3 text-sm text-right text-red-600 font-semibold">
-                    ${data.removed.toFixed(2)}
+                    ₦{data.removed.toFixed(2)}
                   </td>
                   <td className="px-4 py-3 text-sm text-right text-gray-600">{data.removedQty}</td>
                   <td className={`px-4 py-3 text-sm text-right font-bold ${
                     (data.added - data.removed) >= 0 ? 'text-blue-600' : 'text-orange-600'
                   }`}>
-                    ${(data.added - data.removed).toFixed(2)}
+                    ₦{(data.added - data.removed).toFixed(2)}
                   </td>
                 </tr>
               ))}
@@ -441,12 +441,12 @@ export default function AccountingReport() {
                         {m.quantity}
                       </td>
                       <td className="px-6 py-4 text-right text-sm text-gray-600">
-                        ${(m.itemPrice || 0).toFixed(2)}
+                        ₦{(m.itemPrice || 0).toFixed(2)}
                       </td>
                       <td className={`px-6 py-4 text-right text-sm font-bold ${
                         m.movementType === "addition" ? "text-green-600" : "text-red-600"
                       }`}>
-                        {m.movementType === "addition" ? "+" : "-"}${totalValue.toFixed(2)}
+                        {m.movementType === "addition" ? "+" : "-"}₦{totalValue.toFixed(2)}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900">
                         {m.branchId?.name || "Unknown"}

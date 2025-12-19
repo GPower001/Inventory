@@ -9,7 +9,6 @@ import {
   RefreshCw, 
   X, 
   Search,
-  DollarSign,
   Download,
   BarChart3,
   FileText,
@@ -175,8 +174,8 @@ export default function StockMovementReport() {
       m.itemId?.category || "N/A",
       m.movementType,
       m.quantity,
-      `$${(m.itemPrice || 0).toFixed(2)}`,
-      `$${((m.itemPrice || 0) * (m.quantity || 0)).toFixed(2)}`,
+      `₦${(m.itemPrice || 0).toFixed(2)}`,
+      `₦${((m.itemPrice || 0) * (m.quantity || 0)).toFixed(2)}`,
       m.branchId?.name || "Unknown"
     ]);
 
@@ -191,7 +190,6 @@ export default function StockMovementReport() {
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      {/* Header */}
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <div>
@@ -222,7 +220,6 @@ export default function StockMovementReport() {
         </div>
       </div>
 
-      {/* Tabs */}
       <div className="bg-white rounded-lg shadow-sm mb-6">
         <div className="flex border-b border-gray-200">
           <button
@@ -244,13 +241,12 @@ export default function StockMovementReport() {
                 : "text-gray-600 hover:text-gray-900"
             }`}
           >
-            <DollarSign className="w-5 h-5" />
+            <BarChart3 className="w-5 h-5" />
             Accounting
           </button>
         </div>
       </div>
 
-      {/* Filters Panel */}
       {showFilters && (
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           <div className="flex items-center justify-between mb-4">
@@ -337,10 +333,8 @@ export default function StockMovementReport() {
         </div>
       )}
 
-      {/* Stock Movements Tab */}
       {activeTab === "movements" && (
         <>
-          {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <div className="bg-white rounded-lg shadow-sm p-6 border-l-4 border-teal-600">
               <div className="flex items-center justify-between">
@@ -385,7 +379,6 @@ export default function StockMovementReport() {
             </div>
           </div>
 
-          {/* Movements Table */}
           <div className="bg-white rounded-lg shadow-sm overflow-hidden">
             <div className="p-6 border-b border-gray-200">
               <h2 className="text-xl font-semibold text-gray-900">Movement History</h2>
@@ -445,17 +438,15 @@ export default function StockMovementReport() {
         </>
       )}
 
-      {/* Accounting Tab */}
       {activeTab === "accounting" && (
         <>
-          {/* Financial Summary */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <div className="bg-white rounded-lg shadow-sm p-6 border-l-4 border-green-600">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-sm text-gray-600">Stock Added Value</p>
                 <TrendingUp className="w-5 h-5 text-green-600" />
               </div>
-              <p className="text-3xl font-bold text-green-600">${totalAddedValue.toFixed(2)}</p>
+              <p className="text-3xl font-bold text-green-600">₦{totalAddedValue.toLocaleString('en-NG', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
               <p className="text-xs text-gray-500 mt-1">{totalAddedQty} units</p>
             </div>
 
@@ -464,17 +455,17 @@ export default function StockMovementReport() {
                 <p className="text-sm text-gray-600">Stock Removed Value</p>
                 <TrendingDown className="w-5 h-5 text-red-600" />
               </div>
-              <p className="text-3xl font-bold text-red-600">${totalRemovedValue.toFixed(2)}</p>
+              <p className="text-3xl font-bold text-red-600">₦{totalRemovedValue.toLocaleString('en-NG', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
               <p className="text-xs text-gray-500 mt-1">{totalRemovedQty} units</p>
             </div>
 
             <div className="bg-white rounded-lg shadow-sm p-6 border-l-4 border-blue-600">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-sm text-gray-600">Net Value Change</p>
-                <DollarSign className="w-5 h-5 text-blue-600" />
+                <BarChart3 className="w-5 h-5 text-blue-600" />
               </div>
               <p className={`text-3xl font-bold ${netValue >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>
-                {netValue >= 0 ? '+' : ''}${netValue.toFixed(2)}
+                {netValue >= 0 ? '+' : ''}₦{Math.abs(netValue).toLocaleString('en-NG', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
               </p>
             </div>
 
@@ -487,80 +478,82 @@ export default function StockMovementReport() {
             </div>
           </div>
 
-           {/* CATEGORY BREAKDOWN */}
-      <div className="bg-white rounded-lg shadow-sm mb-6">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-            <BarChart3 className="w-5 h-5 text-teal-600" />
-            Category Breakdown
-          </h2>
-        </div>
+          <div className="bg-white rounded-lg shadow-sm mb-6">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-teal-600" />
+                Category Breakdown
+              </h2>
+            </div>
 
-        <div className="overflow-x-auto">
-          <table className="min-w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Added Value</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Removed Value</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Net Value</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {Object.entries(categoryBreakdown).map(([category, data]) => (
-                <tr key={category}>
-                  <td className="px-2 py-4">{category}</td>
-                  <td className="px-6 py-4 text-right text-green-600">${data.added.toFixed(2)}</td>
-                  <td className="px-6 py-4 text-right text-red-600">${data.removed.toFixed(2)}</td>
-                  <td className="px-6 py-4 text-right font-bold">
-                    ${(data.added - data.removed).toFixed(2)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Added Value</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Removed Value</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Net Value</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {Object.entries(categoryBreakdown).map(([category, data]) => (
+                    <tr key={category} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 text-sm font-medium text-gray-900">{category}</td>
+                      <td className="px-6 py-4 text-right text-sm text-green-600 font-semibold">₦{data.added.toLocaleString('en-NG', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                      <td className="px-6 py-4 text-right text-sm text-red-600 font-semibold">₦{data.removed.toLocaleString('en-NG', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                      <td className={`px-6 py-4 text-right text-sm font-bold ${(data.added - data.removed) >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>
+                        ₦{(data.added - data.removed).toLocaleString('en-NG', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
 
-          {/* Transaction Details */}
-             {/* TRANSACTION DETAILS */}
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-            <FileText className="w-5 h-5 text-teal-600" />
-            Transaction Details
-          </h2>
-        </div>
+          <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                <FileText className="w-5 h-5 text-teal-600" />
+                Transaction Details
+              </h2>
+            </div>
 
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Item</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Quantity</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Unit Price</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Total Value</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {filteredMovements.map(m => (
-                <tr key={m._id}>
-                  <td className="px-1 py-4">{new Date(m.createdAt).toLocaleDateString()}</td>
-                  <td className="px-6 py-4 font-semibold">{m.itemId?.name}</td>
-                  <td className="px-1 py-2">{m.movementType}</td>
-                  <td className="px-1 py-2 text-right">{m.quantity}</td>
-                  <td className="px-1 py-4 text-right">${m.itemPrice.toFixed(2)}</td>
-                  <td className="px-1 py-4 text-right font-bold">
-                    ${(m.itemPrice * m.quantity).toFixed(2)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Item</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Quantity</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Unit Price</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Total Value</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {filteredMovements.map(m => (
+                    <tr key={m._id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{new Date(m.createdAt).toLocaleDateString()}</td>
+                      <td className="px-6 py-4 text-sm font-semibold text-gray-900">{m.itemId?.name || "Unknown"}</td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex items-center gap-1 px-3 py-1 text-xs font-medium rounded-full ${getMovementColor(m.movementType)}`}>
+                          {getMovementIcon(m.movementType)}
+                          {m.movementType}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{m.quantity}</td>
+                      <td className="px-6 py-4 text-right text-sm text-gray-600">₦{(m.itemPrice || 0).toLocaleString('en-NG', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                      <td className={`px-6 py-4 text-right text-sm font-bold ${m.movementType === "addition" ? "text-green-600" : "text-red-600"}`}>
+                        {m.movementType === "addition" ? "+" : "-"}₦{((m.itemPrice || 0) * (m.quantity || 0)).toLocaleString('en-NG', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </>
       )}
     </div>
