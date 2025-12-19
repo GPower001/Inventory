@@ -1,6 +1,6 @@
 import express from "express";
 import { authenticate } from "../middlewares/authMiddleware.js";
-import adminOnly from "../middlewares/AdminOnly.js";
+import adminOnly from "../middlewares/adminOnly.js";
 import * as stockMovementController from "../controllers/StockMovementControllers.js";
 
 const router = express.Router();

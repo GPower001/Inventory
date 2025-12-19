@@ -12,6 +12,7 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const dropdownRef = useRef(null);
+  const socketRef = useRef(null);
 
   const userName = user?.name || "Guest User";
   const userAvatar = user?.avatar || DefaultAvatar;
@@ -34,47 +35,67 @@ const Navbar = () => {
     const socket = io(import.meta.env.VITE_API_URL || "https://inventory-sycr.onrender.com", {
       transports: ["websocket", "polling"],
       withCredentials: true,
-      auth: {
-        token: token
+      auth: { 
+        token: token,
+        branchId: branchId // Send branchId during connection
       }
     });
+
+    socketRef.current = socket;
 
     // Debug connection events
     socket.on("connect", () => {
       console.log("Socket connected successfully", socket.id);
+      
+      // Join branch room after connection
+      socket.emit("join-branch", branchId, (response) => {
+        if (response && response.error) {
+          console.error("Failed to join branch:", response.error);
+        } else {
+          console.log("Successfully joined branch room:", branchId);
+        }
+      });
     });
 
     socket.on("connect_error", (error) => {
       console.error("Socket connection error:", error);
     });
 
-    // Join branch room
-    socket.emit("join-branch", branchId, (response) => {
-      if (response && response.error) {
-        console.error("Failed to join branch:", response.error);
-      } else {
-        console.log("Successfully joined branch room:", branchId);
-      }
-    });
-
-    // Listen for new notifications
+    // Listen for new notifications with strict branch filtering
     socket.on("new-notification", (notification) => {
       console.log("New notification received:", notification);
+      
+      // STRICT FILTERING: Only add if it matches current branch
       if (
         notification.branchId === branchId &&
         (notification.type === "expired" || notification.type === "low-stock")
       ) {
         setNotifications((prev) => {
           // Prevent duplicate notifications
-          if (prev.some((n) => n._id === notification._id)) return prev;
+          if (prev.some((n) => n._id === notification._id)) {
+            console.log("Duplicate notification prevented:", notification._id);
+            return prev;
+          }
+          console.log("Adding notification for branch:", branchId);
           return [notification, ...prev];
+        });
+      } else {
+        console.log("Notification filtered out - branch mismatch or wrong type", {
+          notificationBranch: notification.branchId,
+          currentBranch: branchId,
+          type: notification.type
         });
       }
     });
 
     return () => {
-      console.log("Cleaning up socket connection");
+      console.log("Cleaning up socket connection for branch:", branchId);
+      // Leave the branch room before disconnecting
+      if (socket.connected) {
+        socket.emit("leave-branch", branchId);
+      }
       socket.disconnect();
+      socketRef.current = null;
     };
   }, [branchId, user?.token]);
 
@@ -88,11 +109,16 @@ const Navbar = () => {
       try {
         const response = await api.get(`/api/notifications?branchId=${branchId}`);
         const notificationsData = response?.data?.data || [];
-
+        
+        // STRICT FILTERING: Only show notifications for current branch
         const filtered = notificationsData.filter(
-          (n) => !n.isRead && (n.type === "expired" || n.type === "low-stock")
+          (n) => 
+            !n.isRead && 
+            n.branchId === branchId && // Ensure branchId matches
+            (n.type === "expired" || n.type === "low-stock")
         );
-
+        
+        console.log("Fetched notifications for branch:", branchId, filtered.length);
         setNotifications(filtered);
       } catch (error) {
         console.error("Error fetching notifications:", error.message);
@@ -100,6 +126,14 @@ const Navbar = () => {
     };
 
     fetchNotifications();
+  }, [branchId]);
+
+  // --------------------
+  // Clear notifications when branch changes
+  // --------------------
+  useEffect(() => {
+    // Clear notifications when switching branches
+    setNotifications([]);
   }, [branchId]);
 
   // --------------------
@@ -125,6 +159,7 @@ const Navbar = () => {
         setIsOpen(false);
       }
     };
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
@@ -136,125 +171,127 @@ const Navbar = () => {
   // JSX
   // --------------------
   return (
-    <nav className="flex justify-between items-center p-4 bg-white shadow-md relative">
-      {/* Logo */}
-      <div className="flex items-center">
-        <img src={Logo} alt="Logo" className="h-10" />
-      </div>
+    <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
+          {/* Logo */}
+          <div className="flex items-center gap-3">
+            <img src={Logo} alt="Logo" className="h-8 w-8" />
+            <span className="text-xl font-bold text-gray-800">Inventory</span>
+          </div>
 
-      {/* Right Section */}
-      <div className="flex items-center gap-4">
-        {/* Notifications */}
-        <div className="relative" ref={dropdownRef}>
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="flex items-center gap-1 focus:outline-none"
-          >
-            <div className="relative">
-              <Bell
-                size={20}
-                className={`cursor-pointer transition ${
-                  isOpen ? "text-gray-700" : "text-gray-500 hover:text-gray-700"
-                }`}
-              />
-              {hasNotifications && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  {notifications.length}
-                </span>
-              )}
-            </div>
-            <ChevronDown size={16} className={`transition-transform ${isOpen ? "rotate-180" : ""}`} />
-          </button>
-
-          {/* Dropdown Menu */}
-          {isOpen && (
-            <div className="absolute right-0 mt-2 w-72 bg-white rounded-md shadow-lg overflow-hidden z-50 border border-gray-200">
-              <div className="py-1">
-                <div className="px-4 py-2 border-b border-gray-100 bg-gray-50">
-                  <h3 className="text-sm font-medium text-gray-700">Notifications</h3>
+          {/* Right Section */}
+          <div className="flex items-center gap-4">
+            {/* Notifications */}
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="flex items-center gap-1 focus:outline-none"
+              >
+                <div className="relative">
+                  <Bell className="h-6 w-6 text-gray-600 hover:text-gray-800 transition-colors" />
+                  {hasNotifications && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                      {notifications.length}
+                    </span>
+                  )}
                 </div>
-                <div className="max-h-80 overflow-y-auto">
+                <ChevronDown className="h-4 w-4 text-gray-600" />
+              </button>
+
+              {/* Dropdown Menu */}
+              {isOpen && (
+                <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-lg border border-gray-200 max-h-[32rem] overflow-y-auto">
+                  <div className="p-4 border-b border-gray-200">
+                    <h3 className="text-lg font-semibold text-gray-800">
+                      Notifications
+                    </h3>
+                  </div>
+
                   {/* Expired */}
-                  <div>
-                    <div className="px-4 py-2 border-b bg-red-50">
-                      <span className="text-xs font-semibold text-red-600">Expired Items</span>
-                    </div>
+                  <div className="p-4 border-b border-gray-100">
+                    <h4 className="text-sm font-semibold text-red-600 mb-2 flex items-center gap-2">
+                      <AlertTriangle className="h-4 w-4" />
+                      Expired Items
+                    </h4>
                     {expiredNotifications.length > 0 ? (
                       expiredNotifications.map((n) => (
                         <div
                           key={n._id}
-                          className="px-4 py-3 hover:bg-gray-100 cursor-pointer bg-red-50"
+                          className="bg-red-50 border border-red-200 rounded-lg p-3 mb-2 hover:bg-red-100 transition-colors cursor-pointer"
                           onClick={() => markAsRead(n._id)}
                         >
-                          <div className="flex items-start gap-2">
-                            <div className="mt-0.5 p-1 rounded-full bg-red-100 text-red-600">
-                              <AlertTriangle size={14} />
-                            </div>
-                            <div className="flex-1">
-                              <p className="text-sm font-medium text-gray-900">{n.item}</p>
-                              <p className="text-xs text-gray-500">{n.message}</p>
-                              {n.expiryDate && (
-                                <p className="text-xs mt-1 text-red-600">
-                                  Expiry: {new Date(n.expiryDate).toLocaleDateString()}
-                                </p>
-                              )}
-                            </div>
-                          </div>
+                          <p className="font-semibold text-red-800 text-sm">
+                            {n.item}
+                          </p>
+                          <p className="text-red-700 text-xs mt-1">
+                            {n.message}
+                          </p>
+                          {n.expiryDate && (
+                            <p className="text-red-600 text-xs mt-1">
+                              Expiry: {new Date(n.expiryDate).toLocaleDateString()}
+                            </p>
+                          )}
                         </div>
                       ))
                     ) : (
-                      <div className="px-4 py-2 text-xs text-gray-500 text-center">No expired items</div>
+                      <p className="text-gray-500 text-sm">No expired items</p>
                     )}
                   </div>
 
                   {/* Low Stock */}
-                  <div>
-                    <div className="px-4 py-2 border-b bg-amber-50">
-                      <span className="text-xs font-semibold text-amber-700">Low Stock Items</span>
-                    </div>
+                  <div className="p-4">
+                    <h4 className="text-sm font-semibold text-yellow-600 mb-2 flex items-center gap-2">
+                      <AlertTriangle className="h-4 w-4" />
+                      Low Stock Items
+                    </h4>
                     {lowStockNotifications.length > 0 ? (
                       lowStockNotifications.map((n) => (
                         <div
                           key={n._id}
-                          className="px-4 py-3 hover:bg-gray-100 cursor-pointer bg-amber-50"
+                          className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-2 hover:bg-yellow-100 transition-colors cursor-pointer"
                           onClick={() => markAsRead(n._id)}
                         >
-                          <div className="flex items-start gap-2">
-                            <div className="mt-0.5 p-1 rounded-full bg-amber-100 text-amber-600">
-                              <AlertTriangle size={14} />
-                            </div>
-                            <div className="flex-1">
-                              <p className="text-sm font-medium text-gray-900">{n.item}</p>
-                              <p className="text-xs text-gray-500">{n.message}</p>
-                              {n.expiryDate && (
-                                <p className="text-xs mt-1 text-red-600">
-                                  Expiry: {new Date(n.expiryDate).toLocaleDateString()}
-                                </p>
-                              )}
-                            </div>
-                          </div>
+                          <p className="font-semibold text-yellow-800 text-sm">
+                            {n.item}
+                          </p>
+                          <p className="text-yellow-700 text-xs mt-1">
+                            {n.message}
+                          </p>
+                          {n.expiryDate && (
+                            <p className="text-yellow-600 text-xs mt-1">
+                              Expiry: {new Date(n.expiryDate).toLocaleDateString()}
+                            </p>
+                          )}
                         </div>
                       ))
                     ) : (
-                      <div className="px-4 py-2 text-xs text-gray-500 text-center">No low stock items</div>
+                      <p className="text-gray-500 text-sm">No low stock items</p>
                     )}
                   </div>
                 </div>
-              </div>
+              )}
             </div>
-          )}
+
+            {/* User */}
+            <div className="flex items-center gap-2">
+              <img
+                src={userAvatar}
+                alt="User"
+                className="h-8 w-8 rounded-full object-cover"
+              />
+              <span className="text-sm font-medium text-gray-700">
+                {userName}
+              </span>
+            </div>
+
+            {/* Refresh */}
+            <RefreshCcw
+              className="h-5 w-5 text-gray-600 hover:text-gray-800 cursor-pointer transition-colors"
+              onClick={() => window.location.reload()}
+            />
+          </div>
         </div>
-
-        {/* User */}
-        <img src={userAvatar} alt="User Avatar" className="w-10 h-10 rounded-full border" />
-        <span className="text-gray-700 font-medium">{userName}</span>
-
-        {/* Refresh */}
-        <RefreshCcw
-          size={18}
-          className="text-gray-500 cursor-pointer hover:text-gray-700 transition"
-          onClick={() => window.location.reload()}
-        />
       </div>
     </nav>
   );

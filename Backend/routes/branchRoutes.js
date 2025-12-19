@@ -14,7 +14,7 @@
 import { Router } from "express";
 import { createBranch, getBranches, deleteBranch } from "../controllers/branchController.js";
 import { authenticate } from "../middlewares/authMiddleware.js";
-import adminOnly from "../middlewares/AdminOnly.js";
+import adminOnly from "../middlewares/adminOnly.js";
 
 const router = Router();
 
