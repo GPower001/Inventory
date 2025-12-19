@@ -237,7 +237,7 @@ const AdjustStockPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 4;
+  const itemsPerPage = 50;
 
   useEffect(() => {
     const fetchItems = async () => {

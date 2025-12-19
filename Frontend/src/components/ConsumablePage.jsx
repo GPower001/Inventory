@@ -31,14 +31,14 @@ const ConsumablePage = () => {
   const [items, setItems] = useState([]);
   const [editItem, setEditItem] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6;
+  
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
   const [showConfirm, setShowConfirm] = useState(false);
   const [deleteItem, setDeleteItem] = useState(null);
   const [popup, setPopup] = useState(null);
-
+  const itemsPerPage = 50;
   // ✅ Fetch consumables
   useEffect(() => {
     const fetchItems = async () => {

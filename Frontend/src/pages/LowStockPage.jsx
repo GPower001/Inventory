@@ -4,7 +4,7 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { FaFileExcel, FaFileWord } from "react-icons/fa";
 
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 50;
 
 const LowStockItems = () => {
   const [items, setItems] = useState([]);

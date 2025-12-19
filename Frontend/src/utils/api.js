@@ -11,7 +11,7 @@
 
 
 import axios from "axios";
-import { useAuthStore } from "../store/useAuthStore"; // adjust path if needed
+import { useAuthStore } from "../store/useAuthStore";
 
 // Always hit backend API through /api
 const api = axios.create({
@@ -23,12 +23,19 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = useAuthStore.getState().token || localStorage.getItem("token");
-    const branchId = useAuthStore.getState().branchId || localStorage.getItem("branchId");
+    let branchId = useAuthStore.getState().branchId || localStorage.getItem("branchId");
+
+    // ✅ FIX: Filter out invalid branchId values
+    if (branchId === 'null' || branchId === 'undefined' || branchId === '' || !branchId) {
+      branchId = null;
+    }
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    if (branchId) {
+    
+    // ✅ FIX: Only add x-branch-id header if it's valid
+    if (branchId && branchId !== 'null' && branchId !== 'undefined') {
       config.headers["x-branch-id"] = branchId;
     }
 

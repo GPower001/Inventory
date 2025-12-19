@@ -26,11 +26,11 @@ const Popup = ({ message, type, onClose }) => (
 const GeneralPage = () => {
   const [items, setItems] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6;
   const [popup, setPopup] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
+  const itemsPerPage = 50;
 
   // ✅ Added state for delete confirmation
   const [showConfirm, setShowConfirm] = useState(false);

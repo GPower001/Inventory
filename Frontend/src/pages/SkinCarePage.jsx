@@ -27,12 +27,12 @@ const Popup = ({ message, type, onClose }) => (
 const SkinCarePage = () => {
   const [items, setItems] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6;
+  
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
   const [popup, setPopup] = useState(null);
-
+  const itemsPerPage = 50;
 
   // ✅ Delete confirmation states
   const [showConfirm, setShowConfirm] = useState(false);

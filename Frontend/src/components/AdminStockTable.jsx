@@ -81,6 +81,9 @@ export default function StockTable({ items = [], onDeleteRequest, onEditName }) 
               Current Stock
             </th>
             <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+              Price
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
               Status
             </th>
             <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">
@@ -99,6 +102,9 @@ export default function StockTable({ items = [], onDeleteRequest, onEditName }) 
                 <tr key={it._id} className="hover:bg-gray-50 relative">
                   <td className="px-6 py-4">{it.name || it.itemName}</td>
                   <td className="px-6 py-4">{it.openingQty ?? 0}</td>
+                  <td className="px-6 py-4">
+                    {it.price ? `$${parseFloat(it.price).toFixed(2)}` : '-'}
+                  </td>
                   <td className="px-6 py-4">
                     {out ? (
                       <span className="text-red-600 font-medium text-sm">
@@ -177,7 +183,7 @@ export default function StockTable({ items = [], onDeleteRequest, onEditName }) 
           ) : (
             <tr>
               <td
-                colSpan="4"
+                colSpan="5"
                 className="px-6 py-4 text-center text-gray-500 italic"
               >
                 No items available

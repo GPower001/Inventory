@@ -12,12 +12,15 @@
 
 
 import { Router } from "express";
-import { createBranch, getBranches } from "../controllers/branchController.js";
+import { createBranch, getBranches, deleteBranch } from "../controllers/branchController.js";
+import { authenticate } from "../middlewares/authMiddleware.js";
+import adminOnly from "../middlewares/AdminOnly.js";
 
 const router = Router();
 
 router.post("/", createBranch);   // Create branch
 router.get("/", getBranches);     // Fetch all branches
+router.delete("/:id", authenticate, adminOnly, deleteBranch);
 
 export default router;
 

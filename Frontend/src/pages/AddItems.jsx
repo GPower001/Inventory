@@ -1,6 +1,6 @@
 // import React, { useState } from "react";
 // import { ImagePlus, X } from "lucide-react";
-// import axios from "axios";
+// import api from "../utils/api"; // ✅ axios instance (handles token + branchId)
 
 // const AddItems = ({ onClose, onItemAdded }) => {
 //   const [enabled, setEnabled] = useState(false);
@@ -14,7 +14,7 @@
 //   const [image, setImage] = useState(null);
 //   const [imagePreview, setImagePreview] = useState("");
 //   const [loading, setLoading] = useState(false);
-//   const [popup, setPopup] = useState(null); // Popup state
+//   const [popup, setPopup] = useState(null);
 
 //   const generateItemCode = () => {
 //     const code = `ITEM-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -31,7 +31,7 @@
 
 //   const showPopup = (type, message) => {
 //     setPopup({ type, message });
-//     setTimeout(() => setPopup(null), 3000); // 3 seconds
+//     setTimeout(() => setPopup(null), 3000);
 //   };
 
 //   const handleSubmit = async (e) => {
@@ -39,7 +39,6 @@
 //     setLoading(true);
 //     setPopup(null);
 
-//     // Validate required fields
 //     if (!itemName || !category) {
 //       showPopup("error", "Please fill in required fields.");
 //       setLoading(false);
@@ -57,12 +56,10 @@
 //       if (expiryDate) formData.append("expiryDate", expiryDate);
 //       if (image) formData.append("image", image);
 
-//       const response = await axios.post("/api/items", formData, {
-//         headers: {
-//           "Content-Type": "multipart/form-data",
-//         },
-//       });
+//       // ✅ Axios interceptor will attach token + branchId
+//       const response = await api.post("/api/items", formData);
 
+//       // Reset form
 //       setItemName("");
 //       setCategory("");
 //       setOpeningQty("");
@@ -74,18 +71,23 @@
 
 //       showPopup("success", "Item added successfully!");
 
-//       if (onItemAdded) {
-//         onItemAdded(response.data);
-//       }
-
-//       if (onClose) {
-//         setTimeout(() => onClose(), 2000);
-//       }
+//       if (onItemAdded) onItemAdded(response.data);
+//       if (onClose) setTimeout(() => onClose(), 2000);
 //     } catch (error) {
-//       const errMsg =
+//       let errMsg =
 //         error.response?.data?.message ||
 //         error.response?.data?.error ||
 //         "Failed to add item. Please try again.";
+
+//       // ✅ Catch duplicate key error (Mongo E11000)
+//       if (
+//         error.response?.data?.error?.includes("E11000") ||
+//         error.response?.data?.message?.includes("duplicate key") ||
+//         errMsg.toLowerCase().includes("duplicate key")
+//       ) {
+//         errMsg = "Item code already exists in this branch.";
+//       }
+
 //       showPopup("error", errMsg);
 //     } finally {
 //       setLoading(false);
@@ -94,7 +96,7 @@
 
 //   return (
 //     <div className="p-4 sm:p-6 md:p-8 lg:p-10 relative">
-//       {/* Popup notification */}
+//       {/* Popup */}
 //       {popup && (
 //         <div
 //           className={`fixed z-50 left-1/2 top-10 transform -translate-x-1/2 ${
@@ -139,12 +141,12 @@
 //           </button>
 //         </div>
 
-//         {/* Form Fields */}
+//         {/* Form */}
 //         <div className="p-4 sm:p-6">
 //           <form onSubmit={handleSubmit}>
 //             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 //               {/* Item Name */}
-//               <div className="relative">
+//               <div>
 //                 <label className="block text-sm font-medium text-gray-700 mb-1">
 //                   Item Name <span className="text-red-500">*</span>
 //                 </label>
@@ -158,7 +160,7 @@
 //               </div>
 
 //               {/* Category */}
-//               <div className="relative">
+//               <div>
 //                 <label className="block text-sm font-medium text-gray-700 mb-1">
 //                   Category <span className="text-red-500">*</span>
 //                 </label>
@@ -169,28 +171,30 @@
 //                   required
 //                 >
 //                   <option value="">Select</option>
-//                   <option value="Medication">Medications</option>
+//                   <option value="Medications">Medications</option>
 //                   <option value="Consumables">Consumables</option>
-//                   <option value="Generals">Generals</option>
-//                   <option value="Aparatus">Aparatus</option>
+//                   <option value="General">General</option>
+//                   <option value="Apparatus">Apparatus</option>
 //                   <option value="Skin Care Products">Skin Care Products</option>
-//                   <option value="Medication (Fridge)">Medication (Fridge)</option>
+//                   <option value="Medication (Fridge)">
+//                     Medication (Fridge)
+//                   </option>
 //                 </select>
 //               </div>
- 
 
-//               {/* Units Button */}
+//               {/* Units */}
 //               <div className="flex items-end">
 //                 <button
 //                   type="button"
 //                   className="bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded transition-colors"
+//                   onClick={generateItemCode}
 //                 >
-//                   Select Units
+//                   Generate Code
 //                 </button>
 //               </div>
 
 //               {/* Image Upload */}
-//               <div className="relative">
+//               <div>
 //                 <label className="flex items-center space-x-2 text-gray-700 cursor-pointer">
 //                   <ImagePlus size={18} />
 //                   <span className="text-sm font-medium">Add Image</span>
@@ -251,7 +255,6 @@
 //                     className="w-full border border-gray-300 rounded-md py-2 px-3 outline-none focus:border-teal-600"
 //                   />
 //                 </div>
-//                 {/* Expiry Date Field */}
 //                 <div>
 //                   <label className="block text-sm font-medium text-gray-700 mb-1">
 //                     Expiry Date
@@ -266,7 +269,7 @@
 //               </div>
 //             </div>
 
-//             {/* Submit Button */}
+//             {/* Submit */}
 //             <div className="mt-6">
 //               <button
 //                 type="submit"
@@ -283,21 +286,16 @@
 //           </form>
 //         </div>
 //       </div>
-//       {/* Simple fade-in-up animation for popup */}
+
+//       {/* Popup animation */}
 //       <style>
 //         {`
 //           .animate-fade-in-up {
 //             animation: fadeInUp 0.4s;
 //           }
 //           @keyframes fadeInUp {
-//             from {
-//               opacity: 0;
-//               transform: translateY(40px);
-//             }
-//             to {
-//               opacity: 1;
-//               transform: translateY(0);
-//             }
+//             from { opacity: 0; transform: translateY(40px); }
+//             to { opacity: 1; transform: translateY(0); }
 //           }
 //         `}
 //       </style>
@@ -308,8 +306,9 @@
 // export default AddItems;
 
 
+
 import React, { useState } from "react";
-import { ImagePlus, X } from "lucide-react";
+import { X } from "lucide-react";
 import api from "../utils/api"; // ✅ axios instance (handles token + branchId)
 
 const AddItems = ({ onClose, onItemAdded }) => {
@@ -321,22 +320,13 @@ const AddItems = ({ onClose, onItemAdded }) => {
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [expiryDate, setExpiryDate] = useState("");
   const [itemCode, setItemCode] = useState("");
-  const [image, setImage] = useState(null);
-  const [imagePreview, setImagePreview] = useState("");
+  const [price, setPrice] = useState("");
   const [loading, setLoading] = useState(false);
   const [popup, setPopup] = useState(null);
 
   const generateItemCode = () => {
     const code = `ITEM-${Math.floor(1000 + Math.random() * 9000)}`;
     setItemCode(code);
-  };
-
-  const handleImageUpload = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      setImage(file);
-      setImagePreview(URL.createObjectURL(file));
-    }
   };
 
   const showPopup = (type, message) => {
@@ -356,18 +346,30 @@ const AddItems = ({ onClose, onItemAdded }) => {
     }
 
     try {
-      const formData = new FormData();
-      formData.append("name", itemName);
-      formData.append("category", category);
-      formData.append("openingQty", openingQty || 0);
-      formData.append("minStock", minStock || 0);
-      formData.append("itemCode", itemCode || `ITEM-${Date.now()}`);
-      formData.append("dateAdded", date);
-      if (expiryDate) formData.append("expiryDate", expiryDate);
-      if (image) formData.append("image", image);
+      // ✅ Build JSON payload
+      const payload = {
+        name: itemName,  // Backend expects "name", not "itemName"
+        category: category,
+        openingQty: parseInt(openingQty) || 0,
+        minStock: parseInt(minStock) || 0,
+        itemCode: itemCode || `ITEM-${Date.now()}`,
+        dateAdded: date,
+      };
 
-      // ✅ Axios interceptor will attach token + branchId
-      const response = await api.post("/api/items", formData);
+      // Only add optional fields if they have values
+      if (expiryDate) payload.expiryDate = expiryDate;
+      if (price) payload.price = parseFloat(price);
+
+      console.log("📤 Sending payload:", payload); // Debug log
+
+      // ✅ Send as JSON instead of FormData
+      const response = await api.post("/api/items", payload, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      console.log("✅ Response:", response.data); // Debug log
 
       // Reset form
       setItemName("");
@@ -375,8 +377,7 @@ const AddItems = ({ onClose, onItemAdded }) => {
       setOpeningQty("");
       setMinStock("");
       setItemCode("");
-      setImage(null);
-      setImagePreview("");
+      setPrice("");
       setExpiryDate("");
 
       showPopup("success", "Item added successfully!");
@@ -384,6 +385,9 @@ const AddItems = ({ onClose, onItemAdded }) => {
       if (onItemAdded) onItemAdded(response.data);
       if (onClose) setTimeout(() => onClose(), 2000);
     } catch (error) {
+      console.error("❌ Full error:", error);
+      console.error("❌ Error response:", error.response?.data);
+      
       let errMsg =
         error.response?.data?.message ||
         error.response?.data?.error ||
@@ -393,9 +397,10 @@ const AddItems = ({ onClose, onItemAdded }) => {
       if (
         error.response?.data?.error?.includes("E11000") ||
         error.response?.data?.message?.includes("duplicate key") ||
-        errMsg.toLowerCase().includes("duplicate key")
+        errMsg.toLowerCase().includes("duplicate key") ||
+        errMsg.toLowerCase().includes("already exists")
       ) {
-        errMsg = "Item code already exists in this branch.";
+        errMsg = "Item with this name or code already exists in this branch.";
       }
 
       showPopup("error", errMsg);
@@ -492,7 +497,7 @@ const AddItems = ({ onClose, onItemAdded }) => {
                 </select>
               </div>
 
-              {/* Units */}
+              {/* Generate Code Button */}
               <div className="flex items-end">
                 <button
                   type="button"
@@ -503,26 +508,19 @@ const AddItems = ({ onClose, onItemAdded }) => {
                 </button>
               </div>
 
-              {/* Image Upload */}
+              {/* Price */}
               <div>
-                <label className="flex items-center space-x-2 text-gray-700 cursor-pointer">
-                  <ImagePlus size={18} />
-                  <span className="text-sm font-medium">Add Image</span>
-                  <input
-                    type="file"
-                    className="hidden"
-                    onChange={handleImageUpload}
-                  />
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Price
                 </label>
-                {imagePreview && (
-                  <div className="mt-2">
-                    <img
-                      src={imagePreview}
-                      alt="Preview"
-                      className="h-16 w-16 object-cover rounded-md"
-                    />
-                  </div>
-                )}
+                <input
+                  type="number"
+                  step="0.01"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  placeholder="0.00"
+                  className="w-full border border-gray-300 rounded-md py-2 px-3 outline-none focus:border-teal-600"
+                />
               </div>
             </div>
 
@@ -614,6 +612,3 @@ const AddItems = ({ onClose, onItemAdded }) => {
 };
 
 export default AddItems;
-
-
-

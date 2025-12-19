@@ -5,7 +5,7 @@ import { Document, Packer, Paragraph, Table, TableCell, TableRow, WidthType } fr
 import { saveAs } from "file-saver";
 import { FaFileExcel, FaFileWord } from "react-icons/fa";
 import api from "../utils/api"; // ✅ secured axios instance
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 50;
 
 const ItemCategoryPage = () => {
   const [products, setProducts] = useState([]);
